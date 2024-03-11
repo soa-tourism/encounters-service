@@ -5,7 +5,6 @@ import (
 	repository "encounters-service/repositories"
 	"fmt"
 	"log"
-	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,7 +26,7 @@ func initDB() *gorm.DB {
 		log.Fatalf("Error migrating models: %v", err)
 	}
 
-	newEncounter, _ := model.NewEncounterExecution(1, 1, 1, time.Now().AddDate(0, 0, -5), time.Now().AddDate(0, 0, -3))
+	newEncounter, _ := model.NewEncounter(1, "lara", "cao ja sam lara", 3, 0, 0, 12.321, 33.321)
 	fmt.Println(newEncounter)
 	result := database.Create(&newEncounter)
 	if result.Error != nil {
@@ -49,6 +48,6 @@ func main() {
 		fmt.Println("FAILED TO CONNECT TO DB")
 		return
 	}
-	repo := &repository.EncountersExecutionRepository{DatabaseConnection: database}
+	repo := &repository.EncountersRepository{DatabaseConnection: database}
 	fmt.Println(repo.GetPaged(1, 1))
 }
