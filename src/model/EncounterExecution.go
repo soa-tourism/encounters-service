@@ -1,6 +1,8 @@
 package model
 
 import (
+	"encounters-service/abstractions"
+	domainevents "encounters-service/model/domain_events"
 	"errors"
 	"math"
 	"time"
@@ -25,7 +27,8 @@ type EncounterExecution struct {
 	Status      EncounterExecutionStatus
 	StartTime   time.Time
 	EndTime     time.Time
-	Changes     []DomainEvent
+	Changes     []abstractions.DomainEvent
+	Version     int64
 }
 
 // NewEncounterExecution creates a new EncounterExecution with the specified parameters.
@@ -69,11 +72,7 @@ func (ee *EncounterExecution) Activate() {
 	ee.Status = Active
 	ee.StartTime = time.Now()
 	if ee.Encounter.Type == Social {
-		ee.Causes(SocialEncounterActivated{
-			Id:        ee.Id,
-			TouristId: ee.TouristId,
-			Time:      time.Now(),
-		})
+		ee.Causes(domainevents.NewSocialEncounterActivated(ee.Id, ee.TouristId, time.Now()))
 	}
 }
 
@@ -85,11 +84,7 @@ func (ee *EncounterExecution) Abandon() {
 // Complete sets the status to Completed and updates the end time.
 func (ee *EncounterExecution) Complete() {
 	if ee.Encounter.Type == Social && ee.Status == Active {
-		ee.Causes(SocialEncounterCompleted{
-			ID:        ee.ID,
-			Time:      time.Now(),
-			TouristID: ee.TouristID,
-		})
+		ee.Causes(domainevents.NewSocialEncounterCompleted(ee.Id, time.Now(), ee.TouristId))
 	}
 	ee.Status = Completed
 	ee.EndTime = time.Now()
@@ -106,12 +101,12 @@ func (ee *EncounterExecution) CheckRangeDistance(touristLongitude, touristLatitu
 }
 
 // Causes adds a domain event to the Changes list and applies the event.
-func (ee *EncounterExecution) Causes(event DomainEvent) {
+func (ee *EncounterExecution) Causes(event abstractions.DomainEvent) {
 	ee.Changes = append(ee.Changes, event)
 	ee.Apply(event)
 }
 
 // Apply increments the version when a domain event is applied.
-func (ee *EncounterExecution) Apply(event DomainEvent) {
+func (ee *EncounterExecution) Apply(event abstractions.DomainEvent) {
 	ee.Version++
 }
