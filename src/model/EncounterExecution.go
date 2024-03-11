@@ -20,26 +20,27 @@ const (
 
 // EncounterExecution represents an encounter execution in the explorer system.
 type EncounterExecution struct {
-	Id          int64
-	EncounterId int64
-	Encounter   Encounter
-	TouristId   int64
-	Status      EncounterExecutionStatus
-	StartTime   time.Time
-	EndTime     time.Time
-	Changes     []abstractions.DomainEvent
-	Version     int64
+	Id          int64                      `json:"id" gorm:"primaryKey"`
+	EncounterId int64                      `json:"encounterId" gorm:"foreignKey:Id;references:Id"`
+	Encounter   Encounter                  `json:"encounter"`
+	TouristId   int64                      `json:"touristId"`
+	Status      EncounterExecutionStatus   `json:"status"`
+	StartTime   time.Time                  `json:"startTime"`
+	EndTime     time.Time                  `json:"endTime"`
+	Changes     []abstractions.DomainEvent `json:"-" gorm:"type:jsonb;"`
+	Version     int64                      `json:"-"`
 }
 
 // NewEncounterExecution creates a new EncounterExecution with the specified parameters.
-func NewEncounterExecution(encounterID int64, encounter Encounter, touristID int64, status EncounterExecutionStatus, startTime, endTime time.Time) (EncounterExecution, error) {
+func NewEncounterExecution(encounterID int64, touristID int64, status EncounterExecutionStatus, startTime, endTime time.Time) (EncounterExecution, error) {
 	ee := EncounterExecution{
 		EncounterId: encounterID,
-		Encounter:   encounter,
 		TouristId:   touristID,
 		Status:      status,
 		StartTime:   startTime,
 		EndTime:     endTime,
+		Version:     0,
+		Changes:     make([]abstractions.DomainEvent, 0),
 	}
 	if err := ee.Validate(); err != nil {
 		return EncounterExecution{}, err
