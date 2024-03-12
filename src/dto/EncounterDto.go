@@ -22,104 +22,42 @@ type EncounterDto struct {
 
 func CreateEncounterDto(enc model.Encounter) EncounterDto {
 	encounter := EncounterDto{
-		Id:          enc.Id,
-		AuthorId:    enc.AuthorId,
-		Name:        enc.Name,
-		Description: enc.Description,
-		Xp:          enc.Xp,
-		Status:      enc.Status,
-		Type:        enc.Type,
-		Latitude:    enc.Latitude,
-		Longitude:   enc.Longitude,
-	}
-	return encounter
-}
-
-func CreateSocialEncounterDto(enc model.SocialEncounter) EncounterDto {
-	encounter := EncounterDto{
 		Id:                enc.Id,
-		AuthorId:          enc.Encounter.AuthorId,
-		Name:              enc.Encounter.Name,
-		Description:       enc.Encounter.Description,
-		Xp:                enc.Encounter.Xp,
-		Status:            enc.Encounter.Status,
-		Type:              enc.Encounter.Type,
-		Latitude:          enc.Encounter.Latitude,
-		Longitude:         enc.Encounter.Longitude,
-		RequiredPeople:    enc.RequiredPeople,
+		AuthorId:          enc.AuthorId,
+		Name:              enc.Name,
+		Description:       enc.Description,
+		Xp:                enc.Xp,
+		Status:            enc.Status,
+		Type:              enc.Type,
+		Latitude:          enc.Latitude,
+		Longitude:         enc.Longitude,
+		LocationLongitude: enc.LocationLongitude,
+		LocationLatitude:  enc.Latitude,
+		Image:             enc.Image,
 		Range:             enc.Range,
 		ActiveTouristsIds: enc.ActiveTouristsIds,
-	}
-	return encounter
-}
-
-func CreateHiddenLocationEncounterDto(enc model.HiddenLocationEncounter) EncounterDto {
-	encounter := EncounterDto{
-		Id:                enc.Id,
-		AuthorId:          enc.Encounter.AuthorId,
-		Name:              enc.Encounter.Name,
-		Description:       enc.Encounter.Description,
-		Xp:                enc.Encounter.Xp,
-		Status:            enc.Encounter.Status,
-		Type:              enc.Encounter.Type,
-		Latitude:          enc.Encounter.Latitude,
-		Longitude:         enc.Encounter.Longitude,
-		LocationLongitude: enc.LocationLongitude,
-		LocationLatitude:  enc.LocationLatitude,
-		Image:             enc.Image,
+		RequiredPeople:    enc.RequiredPeople,
 	}
 	return encounter
 }
 
 func (dto EncounterDto) GetEncounter() model.Encounter {
 	encounter := model.Encounter{
-		Id:          dto.Id,
-		AuthorId:    dto.AuthorId,
-		Name:        dto.Name,
-		Description: dto.Description,
-		Xp:          dto.Xp,
-		Status:      dto.Status,
-		Type:        dto.Type,
-		Longitude:   dto.Longitude,
-		Latitude:    dto.Latitude,
-	}
-	return encounter
-}
-func (dto EncounterDto) GetSocialEncounter() model.SocialEncounter {
-	socialEncounter := model.SocialEncounter{
-		Encounter: model.Encounter{
-			Id:          dto.Id,
-			AuthorId:    dto.AuthorId,
-			Name:        dto.Name,
-			Description: dto.Description,
-			Xp:          dto.Xp,
-			Status:      dto.Status,
-			Type:        dto.Type,
-			Longitude:   dto.Longitude,
-			Latitude:    dto.Latitude,
-		},
-		RequiredPeople:    dto.RequiredPeople,
+		Id:                dto.Id,
+		AuthorId:          dto.AuthorId,
+		Name:              dto.Name,
+		Description:       dto.Description,
+		Xp:                dto.Xp,
+		Status:            dto.Status,
+		Type:              dto.Type,
+		Longitude:         dto.Longitude,
+		Latitude:          dto.Latitude,
+		LocationLongitude: dto.LocationLongitude,
+		LocationLatitude:  dto.Latitude,
+		Image:             dto.Image,
 		Range:             dto.Range,
 		ActiveTouristsIds: dto.ActiveTouristsIds,
+		RequiredPeople:    dto.RequiredPeople,
 	}
-	return socialEncounter
-}
-func (dto EncounterDto) GetHiddenLocationEncounter() model.HiddenLocationEncounter {
-	hiddenLocationEncounter := model.HiddenLocationEncounter{
-		Encounter: model.Encounter{
-			Id:          dto.Id,
-			AuthorId:    dto.AuthorId,
-			Name:        dto.Name,
-			Description: dto.Description,
-			Xp:          dto.Xp,
-			Status:      dto.Status,
-			Type:        dto.Type,
-			Longitude:   dto.Longitude,
-			Latitude:    dto.Latitude,
-		},
-		LocationLongitude: dto.LocationLongitude,
-		LocationLatitude:  dto.LocationLatitude,
-		Image:             dto.Image,
-	}
-	return hiddenLocationEncounter
+	return encounter
 }

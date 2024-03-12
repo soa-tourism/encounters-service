@@ -2,9 +2,11 @@ package model
 
 import (
 	"encounters-service/abstractions"
+	domainevents "encounters-service/model/domain_events"
 	"errors"
 	"math"
 	"strings"
+	"time"
 )
 
 type EncounterStatus int
@@ -24,17 +26,24 @@ const (
 )
 
 type Encounter struct {
-	Id          int64                      `json:"id" gorm:"primaryKey"`
-	AuthorId    int64                      `json:"authorId"`
-	Name        string                     `json:"name"`
-	Description string                     `json:"description"`
-	Xp          int                        `json:"xp"`
-	Status      EncounterStatus            `json:"status"`
-	Type        EncounterType              `json:"type"`
-	Latitude    float64                    `json:"latitude"`
-	Longitude   float64                    `json:"longitude"`
-	Changes     []abstractions.DomainEvent `json:"-" gorm:"type:jsonb"`
-	Version     int64                      `json:"-"`
+	Id                int64           `json:"id" gorm:"primaryKey"`
+	AuthorId          int64           `json:"authorId"`
+	Name              string          `json:"name"`
+	Description       string          `json:"description"`
+	Xp                int             `json:"xp"`
+	Status            EncounterStatus `json:"status"`
+	Type              EncounterType   `json:"type"`
+	Latitude          float64         `json:"latitude"`
+	Longitude         float64         `json:"longitude"`
+	RequiredPeople    int             `json:"requiredPeople"`
+	Range             float64         `json:"range"`
+	ActiveTouristsIds []int           `json:"activeTouristsIds" gorm:"type:jsonb"`
+	LocationLongitude float64         `json:"locationLongitude"`
+	LocationLatitude  float64         `json:"locationLatitude"`
+	Image             string          `json:"image"`
+
+	Changes []abstractions.DomainEvent `json:"-" gorm:"type:jsonb"`
+	Version int64                      `json:"-"`
 }
 
 func NewEncounter(authorID int64, name, description string, xp int, encounterType EncounterType, status EncounterStatus, latitude, longitude float64) (Encounter, error) {
@@ -54,19 +63,6 @@ func NewEncounter(authorID int64, name, description string, xp int, encounterTyp
 		Version:     0,
 		Changes:     make([]abstractions.DomainEvent, 0),
 	}, nil
-}
-
-func (e Encounter) Copy() Encounter {
-	return Encounter{
-		AuthorId:    e.AuthorId,
-		Name:        e.Name,
-		Description: e.Description,
-		Xp:          e.Xp,
-		Status:      e.Status,
-		Type:        e.Type,
-		Latitude:    e.Latitude,
-		Longitude:   e.Longitude,
-	}
 }
 
 func (e Encounter) IsValid() bool {
@@ -124,6 +120,96 @@ func (e Encounter) IsCloseEnough(longitude, latitude float64) bool {
 
 func (e Encounter) MakeEncounterPublished() {
 	e.Status = 2
+}
+
+func (hle *Encounter) CheckIfInRangeLocation(touristLongitude, touristLatitude float64) bool {
+	if hle.Status != 1 {
+		return false
+	}
+	distance := math.Acos(math.Sin(math.Pi/180*hle.LocationLatitude)*math.Sin(math.Pi/180*touristLatitude)+math.Cos(math.Pi/180*hle.LocationLatitude)*math.Cos(math.Pi/180*touristLatitude)*math.Cos(math.Pi/180*hle.LocationLongitude-math.Pi/180*touristLongitude)) * 6371000
+	if distance <= hle.Range {
+		return true
+	}
+	return false
+}
+
+func (hle *Encounter) CheckIfLocationFound(touristLongitude, touristLatitude float64) bool {
+	if hle.Status != 1 {
+		return false
+	}
+	distance := math.Acos(math.Sin(math.Pi/180*hle.LocationLatitude)*math.Sin(math.Pi/180*touristLatitude)+math.Cos(math.Pi/180*hle.LocationLatitude)*math.Cos(math.Pi/180*touristLatitude)*math.Cos(math.Pi/180*hle.LocationLongitude-math.Pi/180*touristLongitude)) * 6371000
+	if distance <= 5.0 {
+		return true
+	}
+	return false
+}
+
+func (s *Encounter) CheckIfInRange(touristLongitude, touristLatitude float64, touristId int) int {
+	if s.Status != 0 {
+		return -1
+	}
+	s.Causes(domainevents.NewSocialEncounterLocationUpdated(s.Id, touristId, time.Now(), s.Longitude, s.Latitude))
+	distance := s.GetDistanceFromEncounter(touristLongitude, touristLatitude)
+	if distance > s.Range {
+		s.RemoveTourist(touristId)
+		return 0
+	}
+	s.AddTourist(touristId)
+	return len(s.ActiveTouristsIds)
+}
+
+func (s *Encounter) AddTourist(touristId int) {
+	if s.Status != 0 {
+		return
+	}
+	if !s.isTouristInActiveList(touristId) {
+		s.ActiveTouristsIds = append(s.ActiveTouristsIds, touristId)
+		s.Causes(domainevents.NewSocialEncounterRangeChecked(s.Id, s.ActiveTouristsIds, time.Now()))
+	}
+}
+
+func (s *Encounter) RemoveTourist(touristId int) {
+	if s.Status != 0 {
+		return
+	}
+	if s.isTouristInActiveList(touristId) {
+		for i, id := range s.ActiveTouristsIds {
+			if id == touristId {
+				s.ActiveTouristsIds = append(s.ActiveTouristsIds[:i], s.ActiveTouristsIds[i+1:]...)
+				s.Causes(domainevents.NewSocialEncounterRangeChecked(s.Id, s.ActiveTouristsIds, time.Now()))
+				break
+			}
+		}
+	}
+}
+
+func (s *Encounter) IsRequiredPeopleNumber() bool {
+	if s.Status != 0 {
+		return false
+	}
+	numberOfTourists := len(s.ActiveTouristsIds)
+	if numberOfTourists >= s.RequiredPeople {
+		s.ClearActiveTourists()
+	}
+	return numberOfTourists >= s.RequiredPeople
+}
+
+func (s *Encounter) ClearActiveTourists() {
+	if s.Status == 0 {
+		s.ActiveTouristsIds = []int{}
+	}
+}
+
+func (s *Encounter) isTouristInActiveList(touristId int) bool {
+	if s.Status != 0 {
+		return false
+	}
+	for _, id := range s.ActiveTouristsIds {
+		if id == touristId {
+			return true
+		}
+	}
+	return false
 }
 
 func (ee *Encounter) Causes(event abstractions.DomainEvent) {
