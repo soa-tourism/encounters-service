@@ -9,12 +9,13 @@ const (
 )
 
 type EncounterRequest struct {
+	Id          int64
 	EncounterId int64
-	TouristId   int
+	TouristId   int64
 	Status      RequestStatus
 }
 
-func NewEncounterRequest(encounterId int64, requestStatus RequestStatus, touristId int) *EncounterRequest {
+func NewEncounterRequest(encounterId int64, requestStatus RequestStatus, touristId int64) *EncounterRequest {
 	return &EncounterRequest{
 		EncounterId: encounterId,
 		Status:      requestStatus,
