@@ -10,7 +10,7 @@ type EncounterRequestService struct {
 	Repo *repository.EncounterRequestDatabaseRepository
 }
 
-func (s EncounterRequestService) AcceptRequest(id int) (dto.EncounterRequestDto, error) {
+func (s EncounterRequestService) AcceptRequest(id int64) (dto.EncounterRequestDto, error) {
 	request, err := s.Repo.AcceptRequest(id)
 	if err != nil {
 		return dto.EncounterRequestDto{}, fmt.Errorf("failed to accept request: %v", err)
@@ -18,7 +18,7 @@ func (s EncounterRequestService) AcceptRequest(id int) (dto.EncounterRequestDto,
 	return dto.CreateEncounterRequestDto(request), nil
 }
 
-func (s EncounterRequestService) RejectRequest(id int) (dto.EncounterRequestDto, error) {
+func (s EncounterRequestService) RejectRequest(id int64) (dto.EncounterRequestDto, error) {
 	request, err := s.Repo.RejectRequest(id)
 	if err != nil {
 		return dto.EncounterRequestDto{}, fmt.Errorf("failed to reject request: %v", err)
