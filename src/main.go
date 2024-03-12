@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encounters-service/dto"
 	"encounters-service/model"
 	repository "encounters-service/repositories"
 	"fmt"
@@ -27,22 +28,18 @@ func initDB() *gorm.DB {
 	}
 
 	newEncounter, _ := model.NewEncounter(1, "lara", "cao ja sam lara", 3, 0, 0, 12.321, 33.321)
-	fmt.Println(newEncounter)
+
 	result := database.Create(&newEncounter)
 	if result.Error != nil {
 		log.Fatalf("Error creating new encounter: %v", result.Error)
 	}
-
+	dto := dto.CreateEncounterDto(newEncounter)
+	fmt.Println(dto.GetHiddenLocationEncounter())
 	fmt.Printf("Rows affected: %d\n", result.RowsAffected)
 	return database
 }
 
 func main() {
-	enc := model.Encounter{
-		AuthorId: 10,
-	}
-	fmt.Println(enc)
-
 	database := initDB()
 	if database == nil {
 		fmt.Println("FAILED TO CONNECT TO DB")
