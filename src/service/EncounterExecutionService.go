@@ -2,6 +2,7 @@ package service
 
 import (
 	"encounters-service/dto"
+	"encounters-service/model"
 	repository "encounters-service/repositories"
 	"fmt"
 )
@@ -13,11 +14,11 @@ type EncounterExecutionService struct {
 func (s EncounterExecutionService) Create(encounterDto dto.EncounterExecutionDto, userId int64) (dto.EncounterExecutionDto, error) {
 	encounter := encounterDto.GetEncounterExecution()
 	if encounter.TouristId != userId {
-		return dto.CreateEncounterExecutionDto(encounter), fmt.Errorf(fmt.Sprintf("Tourist is not ok"))
+		return dto.CreateEncounterExecutionDto(encounter), fmt.Errorf("tourist is not ok")
 	}
 	err := encounter.Validate()
 	if err != nil {
-		return dto.CreateEncounterExecutionDto(encounter), fmt.Errorf(fmt.Sprintf("Encounter is not valid"))
+		return dto.CreateEncounterExecutionDto(encounter), fmt.Errorf("encounter is not valid")
 	}
 	s.Repo.Create(&encounter)
 	return dto.CreateEncounterExecutionDto(encounter), nil
@@ -41,16 +42,16 @@ func (s EncounterExecutionService) Get(executionId int64) (dto.EncounterExecutio
 
 func (s EncounterExecutionService) Update(execution dto.EncounterExecutionDto, userId int64) (dto.EncounterExecutionDto, error) {
 	if userId != execution.TouristId {
-		return execution, fmt.Errorf(fmt.Sprintf("Not the tourist of the execution"))
+		return execution, fmt.Errorf("not the tourist of the execution")
 	}
 	enc := execution.GetEncounterExecution()
 	err := enc.Validate()
 	if err != nil {
-		return dto.CreateEncounterExecutionDto(enc), fmt.Errorf(fmt.Sprintf("Encounter is not valid"))
+		return dto.CreateEncounterExecutionDto(enc), fmt.Errorf("encounter is not valid")
 	}
 	er := s.Repo.Update(&enc)
 	if er != nil {
-		return execution, fmt.Errorf(fmt.Sprintf("Error updating encounter"))
+		return execution, fmt.Errorf("error updating encounter")
 	}
 	return dto.CreateEncounterExecutionDto(enc), nil
 }
@@ -71,4 +72,68 @@ func (s EncounterExecutionService) GetAllCompletedByTourist(touristId int64) []d
 		executionDtos = append(executionDtos, dto.CreateEncounterExecutionDto(exec))
 	}
 	return executionDtos
+}
+
+func (s EncounterExecutionService) isTouristInRange(execution model.EncounterExecution, touristLatitude float64, touristLongitude float64) bool {
+	if execution.Encounter.Type == 2 && execution.CheckRangeDistance(touristLongitude, touristLatitude) <= 300.0 {
+		return true
+	}
+	if execution.Encounter.Type == 0 && execution.CheckRangeDistance(touristLongitude, touristLatitude) <= execution.Encounter.Range {
+		return true
+	}
+	if execution.Encounter.Type == 1 && execution.Encounter.CheckIfInRangeLocation(touristLongitude, touristLatitude) {
+		return true
+	}
+	return false
+}
+
+func (s EncounterExecutionService) Activate(touristId int64, touristLatitude float64, touristLongitude float64, encounterId int64) (dto.EncounterExecutionDto, error) {
+	execution, _ := s.Repo.GetByEncounterAndTourist(touristId, encounterId)
+	if execution.Status == 1 {
+		return dto.EncounterExecutionDto{}, fmt.Errorf("encounter already completed")
+	}
+	if s.isTouristInRange(execution, touristLatitude, touristLongitude) {
+		execution.Activate()
+		s.Repo.Update(&execution)
+		return dto.CreateEncounterExecutionDto(execution), nil
+	}
+	return dto.EncounterExecutionDto{}, fmt.Errorf("error activating encounter")
+}
+
+func (s EncounterExecutionService) GetVisibleByTour(encounterIds []int64, touristLongitude float64, touristLatitude float64, touristId int64) dto.EncounterExecutionDto {
+	repo := repository.EncountersRepository{
+		DatabaseConnection: s.Repo.DatabaseConnection,
+	}
+	encounters, _ := repo.GetByIds(encounterIds)
+	if len(encounters) > 0 {
+		closestEncounter := encounters[0]
+		bestDistance := closestEncounter.GetDistanceFromEncounter(touristLongitude, touristLatitude)
+
+		for _, encounter := range encounters {
+			distance := encounter.GetDistanceFromEncounter(touristLongitude, touristLatitude)
+			if distance < bestDistance && encounter.IsCloseEnough(touristLongitude, touristLatitude) {
+				bestDistance = distance
+				closestEncounter = encounter
+			}
+		}
+		execution, err := s.Repo.GetByEncounterAndTourist(touristId, closestEncounter.Id)
+		var encounterDto dto.EncounterExecutionDto
+		if err != nil {
+			encounterDto = s.createNewEcounterExecution(touristId, closestEncounter)
+		} else {
+			encounterDto = dto.CreateEncounterExecutionDto(execution)
+		}
+		return encounterDto
+	}
+	return dto.EncounterExecutionDto{}
+}
+
+func (s EncounterExecutionService) createNewEcounterExecution(touristId int64, closestEncounter model.Encounter) dto.EncounterExecutionDto {
+	execution := model.EncounterExecution{
+		EncounterId: closestEncounter.Id,
+		Encounter:   closestEncounter,
+		TouristId:   touristId,
+	}
+	s.Repo.Create(&execution)
+	return dto.CreateEncounterExecutionDto(execution)
 }
