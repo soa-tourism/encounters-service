@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encounters-service/dto"
 	"encounters-service/model"
 	repository "encounters-service/repositories"
+	"encounters-service/service"
 	"fmt"
 	"log"
 
@@ -27,13 +29,11 @@ func initDB() *gorm.DB {
 		log.Fatalf("Error migrating models: %v", err)
 	}
 
-	newEncounter, _ := model.NewEncounter(1, "lara", "cao ja sam lara", 3, 0, 0, 12.321, 33.321)
-
-	result := database.Create(&newEncounter)
-	if result.Error != nil {
-		log.Fatalf("Error creating new encounter: %v", result.Error)
-	}
-	fmt.Printf("Rows affected: %d\n", result.RowsAffected)
+	// result := database.Create(&newEncounter)
+	// if result.Error != nil {
+	// 	log.Fatalf("Error creating new encounter: %v", result.Error)
+	// }
+	// fmt.Printf("Rows affected: %d\n", result.RowsAffected)
 	return database
 }
 
@@ -43,6 +43,29 @@ func main() {
 		fmt.Println("FAILED TO CONNECT TO DB")
 		return
 	}
+	newEncounter := dto.EncounterDto{
+		Id:                0,
+		AuthorId:          1,
+		Name:              "Enc",
+		Description:       "Enco",
+		Xp:                12,
+		Status:            0,
+		Type:              0,
+		Longitude:         12.2,
+		Latitude:          15.5,
+		LocationLongitude: 0,
+		LocationLatitude:  0,
+		Image:             "",
+		Range:             10.0,
+		ActiveTouristsIds: make([]int, 0),
+		RequiredPeople:    4,
+	}
+
 	repo := &repository.EncountersRepository{DatabaseConnection: database}
+	service := &service.EncounterService{
+		Repo: repo,
+	}
+	encounter, _ := service.Create(newEncounter, 10, true, 1)
+	fmt.Println(encounter)
 	fmt.Println(repo.GetPaged(1, 1))
 }

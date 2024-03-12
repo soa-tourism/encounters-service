@@ -2,6 +2,8 @@ package repository
 
 import (
 	"encounters-service/model"
+	domainevents "encounters-service/model/domain_events"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -14,6 +16,9 @@ func (repo *EncountersRepository) Create(encounter *model.Encounter) error {
 	dbResult := repo.DatabaseConnection.Create(encounter)
 	if dbResult.Error != nil {
 		return dbResult.Error
+	}
+	if encounter.Type == 0 {
+		encounter.Causes(domainevents.NewSocialEncounterCreated(encounter.Id, time.Now(), encounter.RequiredPeople, encounter.Range))
 	}
 	return nil
 }
