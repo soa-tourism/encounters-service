@@ -23,7 +23,7 @@ func initDB() *gorm.DB {
 	database.AutoMigrate(&model.EncounterExecution{})
 	database.AutoMigrate(&model.EncounterRequest{})
 	database.AutoMigrate(&model.HiddenLocationEncounter{})
-	//database.AutoMigrate(&model.SocialEncounter{})
+	database.AutoMigrate(&model.SocialEncounter{})
 
 	err = database.AutoMigrate(&model.Encounter{}, &model.EncounterExecution{})
 	if err != nil {
@@ -50,7 +50,7 @@ func main() {
 	}
 	repo := &repository.EncountersRepository{DatabaseConnection: database}
 	addHiddenLocationEncounter(database)
-	//addSocialEncounter(database)
+	addSocialEncounter(database)
 	fmt.Println(repo.GetPaged(1, 1))
 }
 

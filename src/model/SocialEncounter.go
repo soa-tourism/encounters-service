@@ -13,7 +13,7 @@ type SocialEncounter struct {
 	Encounter         Encounter `json:"encounter"`
 	RequiredPeople    int       `json:"requiredPeople"`
 	Range             float64   `json:"range"`
-	ActiveTouristsIds []int     `json:"activeTouristsIds"`
+	ActiveTouristsIds []int     `json:"activeTouristsIds" gorm:"type:jsonb"`
 }
 
 func NewSocialEncounter(encounter Encounter, requiredPeople int, rangeVal float64) SocialEncounter {
