@@ -1,7 +1,10 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	domainevents "encounters-service/model/domain_events"
+	"errors"
 	"time"
 )
 
@@ -77,4 +80,21 @@ func (s *SocialEncounter) isTouristInActiveList(touristId int) bool {
 		}
 	}
 	return false
+}
+
+func (s *SocialEncounter) Scan(value interface{}) error {
+	if value == nil {
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("unsupported type for Scan")
+	}
+
+	return json.Unmarshal(bytes, s)
+}
+
+func (s SocialEncounter) Value() (driver.Value, error) {
+	return json.Marshal(s)
 }

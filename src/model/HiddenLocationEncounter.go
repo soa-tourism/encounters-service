@@ -1,12 +1,15 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
 	"math"
 )
 
 type HiddenLocationEncounter struct {
 	Id                int64     `json:"id" gorm:"primaryKey;foreignKey:Id"`
-	Encounter         Encounter `json:"encounter"`
+	Encounter         Encounter `json:"-"`
 	LocationLongitude float64   `json:"locationLongitude"`
 	LocationLatitude  float64   `json:"locationLatitude"`
 	Image             string    `json:"image"`
@@ -37,4 +40,22 @@ func (hle *HiddenLocationEncounter) CheckIfLocationFound(touristLongitude, touri
 		return true
 	}
 	return false
+}
+
+func (e *Encounter) Scan(value interface{}) error {
+	// Check if the value is nil
+	if value == nil {
+		return nil
+	}
+
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("unsupported type for Scan")
+	}
+
+	return json.Unmarshal(bytes, &e)
+}
+
+func (e Encounter) Value() (driver.Value, error) {
+	return json.Marshal(e)
 }
