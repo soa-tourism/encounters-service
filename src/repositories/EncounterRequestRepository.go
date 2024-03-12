@@ -10,6 +10,14 @@ type EncounterRequestDatabaseRepository struct {
 	DatabaseConnection *gorm.DB
 }
 
+func (repo *EncounterRequestDatabaseRepository) Create(encounterRequest *model.EncounterRequest) error {
+	dbResult := repo.DatabaseConnection.Create(encounterRequest)
+	if dbResult.Error != nil {
+		return dbResult.Error
+	}
+	return nil
+}
+
 func (repo *EncounterRequestDatabaseRepository) AcceptRequest(id int) (model.EncounterRequest, error) {
 	requestToUpdate := model.EncounterRequest{}
 	dbResult := repo.DatabaseConnection.First(&requestToUpdate, "Id = ?", id)
