@@ -3,21 +3,21 @@ package dto
 import "encounters-service/model"
 
 type EncounterDto struct {
-	Id                int64                 `json:"id"`
-	AuthorId          int64                 `json:"authorId"`
-	Name              string                `json:"name"`
-	Description       string                `json:"description"`
-	Xp                int                   `json:"xp"`
-	Status            model.EncounterStatus `json:"status"`
-	Type              model.EncounterType   `json:"type"`
-	Latitude          float64               `json:"latitude"`
-	Longitude         float64               `json:"longitude"`
-	LocationLongitude float64               `json:"locationLongitude"`
-	LocationLatitude  float64               `json:"locationLatitude"`
-	Image             string                `json:"image"`
-	Range             float64               `json:"range"`
-	RequiredPeople    int                   `json:"requiredPeople"`
-	ActiveTouristsIds []int                 `json:"activeTouristsIds"`
+	Id                int64   `json:"id"`
+	AuthorId          int64   `json:"authorId"`
+	Name              string  `json:"name"`
+	Description       string  `json:"description"`
+	Xp                int     `json:"xp"`
+	Status            int     `json:"status"`
+	Type              int     `json:"type"`
+	Latitude          float64 `json:"latitude"`
+	Longitude         float64 `json:"longitude"`
+	LocationLongitude float64 `json:"locationLongitude"`
+	LocationLatitude  float64 `json:"locationLatitude"`
+	Image             string  `json:"image"`
+	Range             float64 `json:"range"`
+	RequiredPeople    int     `json:"requiredPeople"`
+	ActiveTouristsIds []int   `json:"activeTouristsIds"`
 }
 
 func CreateEncounterDto(enc model.Encounter) EncounterDto {

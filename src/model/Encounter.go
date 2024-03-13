@@ -9,41 +9,24 @@ import (
 	"time"
 )
 
-type EncounterStatus int
-
-const (
-	Draft EncounterStatus = iota
-	Archived
-	Published
-)
-
-type EncounterType int
-
-const (
-	Social EncounterType = iota
-	Location
-	Misc
-)
-
 type Encounter struct {
-	Id                int64           `json:"id" gorm:"primaryKey"`
-	AuthorId          int64           `json:"authorId"`
-	Name              string          `json:"name"`
-	Description       string          `json:"description"`
-	Xp                int             `json:"xp"`
-	Status            EncounterStatus `json:"status"`
-	Type              EncounterType   `json:"type"`
-	Latitude          float64         `json:"latitude"`
-	Longitude         float64         `json:"longitude"`
-	RequiredPeople    int             `json:"requiredPeople"`
-	Range             float64         `json:"range"`
-	ActiveTouristsIds []int           `json:"activeTouristsIds" gorm:"type:jsonb"`
-	LocationLongitude float64         `json:"locationLongitude"`
-	LocationLatitude  float64         `json:"locationLatitude"`
-	Image             string          `json:"image"`
-
-	Changes []abstractions.DomainEvent `json:"-" gorm:"type:jsonb"`
-	Version int64                      `json:"-"`
+	Id                int64                      `json:"id" gorm:"primaryKey"`
+	AuthorId          int64                      `json:"authorId"`
+	Name              string                     `json:"name"`
+	Description       string                     `json:"description"`
+	Xp                int                        `json:"xp"`
+	Status            int                        `json:"status"` // Draft, Archived, Published
+	Type              int                        `json:"type"`   // Social, Location, Misc
+	Latitude          float64                    `json:"latitude"`
+	Longitude         float64                    `json:"longitude"`
+	RequiredPeople    int                        `json:"requiredPeople"`
+	Range             float64                    `json:"range"`
+	ActiveTouristsIds []int                      `json:"activeTouristsIds" gorm:"type:jsonb"`
+	LocationLongitude float64                    `json:"locationLongitude"`
+	LocationLatitude  float64                    `json:"locationLatitude"`
+	Image             string                     `json:"image"`
+	Changes           []abstractions.DomainEvent `json:"-" gorm:"type:jsonb"`
+	Version           int64                      `json:"-"`
 }
 
 func NewEncounter(authorID int64, name, description string, xp int, encounterType EncounterType, status EncounterStatus, latitude, longitude float64) (Encounter, error) {

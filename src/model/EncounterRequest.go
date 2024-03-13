@@ -12,10 +12,10 @@ type EncounterRequest struct {
 	Id          int64
 	EncounterId int64
 	TouristId   int64
-	Status      RequestStatus
+	Status      int //OnHold, Accepted, Rejected
 }
 
-func NewEncounterRequest(encounterId int64, requestStatus RequestStatus, touristId int64) *EncounterRequest {
+func NewEncounterRequest(encounterId int64, requestStatus int, touristId int64) *EncounterRequest {
 	return &EncounterRequest{
 		EncounterId: encounterId,
 		Status:      requestStatus,
@@ -24,9 +24,9 @@ func NewEncounterRequest(encounterId int64, requestStatus RequestStatus, tourist
 }
 
 func (er *EncounterRequest) AcceptRequest() {
-	er.Status = Accepted
+	er.Status = 1
 }
 
 func (er *EncounterRequest) RejectRequest() {
-	er.Status = Rejected
+	er.Status = 2
 }

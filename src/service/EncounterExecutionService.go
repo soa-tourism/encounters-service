@@ -137,3 +137,113 @@ func (s EncounterExecutionService) createNewEcounterExecution(touristId int64, c
 	s.Repo.Create(&execution)
 	return dto.CreateEncounterExecutionDto(execution)
 }
+
+func (s EncounterExecutionService) CheckIfInRange(id int64, touristLongitude float64, touristLatitude float64, touristId int64) (dto.EncounterExecutionDto, error) {
+	oldExecution, _ := s.Repo.Get(id)
+	if oldExecution.Status != 2 || oldExecution.Encounter.Type != 0 {
+		return dto.EncounterExecutionDto{}, fmt.Errorf("encounter is not active")
+	}
+	socialEncounter := oldExecution.Encounter
+	socialEncounter.CheckIfInRange(touristLongitude, touristLatitude, int(touristId))
+	encounterRepository := repository.EncountersRepository{
+		DatabaseConnection: s.Repo.DatabaseConnection,
+	}
+	encounterRepository.Update(&socialEncounter)
+	if socialEncounter.IsRequiredPeopleNumber() {
+		allActiveSocial, _ := s.Repo.GetBySocialEncounter(socialEncounter.Id)
+		for _, activeSocial := range allActiveSocial {
+			if activeSocial.Status == 2 && activeSocial.Id != id {
+				s.CompleteExecution(activeSocial.Id, activeSocial.TouristId, touristLatitude, touristLongitude)
+			}
+		}
+		execution, _ := s.CompleteExecution(id, touristId, touristLatitude, touristLongitude)
+		return execution, nil
+	}
+	return dto.CreateEncounterExecutionDto(oldExecution), nil
+}
+
+// TODO update XP level of the tourist
+func (s EncounterExecutionService) CompleteExecution(id int64, touristId int64, touristLatitude float64, touristLongitude float64) (dto.EncounterExecutionDto, error) {
+	var encounterExecution model.EncounterExecution
+	encounterExecution, _ = s.Repo.Get(id)
+	if encounterExecution.TouristId != touristId {
+		return dto.EncounterExecutionDto{}, fmt.Errorf("encounter is not active")
+	}
+	if encounterExecution.Status != 2 {
+		return dto.EncounterExecutionDto{}, fmt.Errorf("encounter is not active")
+	}
+	if s.isTouristInRange(encounterExecution, touristLatitude, touristLongitude) {
+		encounterExecution.Complete()
+		s.updateAllSocialCompleted(encounterExecution.EncounterId, encounterExecution.Encounter.Type)
+		s.Repo.Update(&encounterExecution)
+		return dto.CreateEncounterExecutionDto(encounterExecution), nil
+	}
+	return dto.EncounterExecutionDto{}, fmt.Errorf("encounter is not active")
+}
+
+func (s EncounterExecutionService) updateAllSocialCompleted(encounterId int64, t int) {
+	completed := make([]model.EncounterExecution, 0)
+	var list []model.EncounterExecution
+	if t == 0 {
+		list, _ = s.Repo.GetBySocialEncounter(encounterId)
+	} else {
+		return
+	}
+	for _, e := range list {
+		completed = append(completed, e)
+	}
+	s.Repo.UpdateRange(completed)
+}
+
+func (s EncounterExecutionService) GetByEncounter(encounterId int64) []dto.EncounterExecutionDto {
+	result, _ := s.Repo.GetByEncounter(encounterId)
+	list := make([]dto.EncounterExecutionDto, 0)
+	for _, e := range result {
+		list = append(list, dto.CreateEncounterExecutionDto(e))
+	}
+	return list
+}
+
+func (s EncounterExecutionService) GetWithUpdatedLocation(encounterIds []int64, id int64, touristLongitude float64, touristLatitude float64, touristId int64) dto.EncounterExecutionDto {
+	s.CheckIfInRange(id, touristLongitude, touristLatitude, touristId)
+	return s.GetVisibleByTour(encounterIds, touristLongitude, touristLatitude, touristId)
+}
+
+func (s EncounterExecutionService) GetHiddenLocationEncounterWithUpdatedLocation(encounterIds []int64, id int64, touristLongitude float64, touristLatitude float64, touristId int64) dto.EncounterExecutionDto {
+	s.CheckIfInRangeLocation(id, touristLongitude, touristLatitude, touristId)
+	return s.GetVisibleByTour(encounterIds, touristLongitude, touristLatitude, touristId)
+}
+
+func (s EncounterExecutionService) GetActiveByTour(touristId int64, encounterIds []int64) []dto.EncounterExecutionDto {
+	result, _ := s.Repo.GetActiveByTourist(touristId)
+	list := make([]dto.EncounterExecutionDto, 0)
+	for _, e := range result {
+		for _, r := range encounterIds {
+			if r == e.EncounterId {
+				list = append(list, dto.CreateEncounterExecutionDto(e))
+				break
+			}
+		}
+	}
+	return list
+}
+
+func (s EncounterExecutionService) CheckIfInRangeLocation(id int64, touristLongitude float64, touristLatitude float64, touristId int64) (dto.EncounterExecutionDto, error) {
+	oldExecution, _ := s.Repo.Get(id)
+	if oldExecution.Status != 2 || oldExecution.Encounter.Type != 1 {
+		return dto.EncounterExecutionDto{}, fmt.Errorf("encounter is not active")
+	}
+	socialEncounter := oldExecution.Encounter
+	if socialEncounter.CheckIfInRangeLocation(touristLongitude, touristLatitude) {
+		encounterRepository := repository.EncountersRepository{
+			DatabaseConnection: s.Repo.DatabaseConnection,
+		}
+		encounterRepository.Update(&socialEncounter)
+		if socialEncounter.CheckIfLocationFound(touristLongitude, touristLatitude) {
+			execution, _ := s.CompleteExecution(id, touristId, touristLatitude, touristLongitude)
+			return execution, nil
+		}
+	}
+
+	return dto.CreateEncounterExecutionDto(oldExecution), nil
+}
