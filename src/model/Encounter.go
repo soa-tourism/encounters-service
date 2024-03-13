@@ -29,7 +29,7 @@ type Encounter struct {
 	Version           int64                      `json:"-"`
 }
 
-func NewEncounter(authorID int64, name, description string, xp int, encounterType EncounterType, status EncounterStatus, latitude, longitude float64) (Encounter, error) {
+func NewEncounter(authorID int64, name, description string, xp int, encounterType int, status int, latitude, longitude float64) (Encounter, error) {
 	if valid := isValid(name, description, authorID, xp, longitude, latitude, status); !valid {
 		return Encounter{}, errors.New("invalid parameters for Encounter")
 	}
@@ -52,7 +52,7 @@ func (e Encounter) IsValid() bool {
 	return isValid(e.Name, e.Description, e.AuthorId, e.Xp, e.Longitude, e.Latitude, e.Status)
 }
 
-func isValid(name, description string, authorID int64, xp int, longitude, latitude float64, status EncounterStatus) bool {
+func isValid(name, description string, authorID int64, xp int, longitude, latitude float64, status int) bool {
 	return isNameValid(name) && isDescriptionValid(description) && isXPValid(xp) &&
 		isAuthorIDValid(authorID) && isLongitudeValid(longitude) && isLatitudeValid(latitude) && isStatusValid(status)
 }
@@ -85,8 +85,8 @@ func isLatitudeValid(latitude float64) bool {
 	return latitude >= -90 && latitude <= 90
 }
 
-func isStatusValid(status EncounterStatus) bool {
-	return status != Archived
+func isStatusValid(status int) bool {
+	return status != 1
 }
 
 func (e Encounter) GetDistanceFromEncounter(longitude, latitude float64) float64 {
