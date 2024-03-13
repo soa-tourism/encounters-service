@@ -7,35 +7,46 @@ import (
 )
 
 type EncounterRequestService struct {
-	Repo *repository.EncounterRequestDatabaseRepository
+	Repo *repository.EncounterRequestRepository
 }
 
-func (s EncounterRequestService) AcceptRequest(id int64) (dto.EncounterRequestDto, error) {
-	request, err := s.Repo.AcceptRequest(id)
+func (service EncounterRequestService) AcceptRequest(id int64) (dto.EncounterRequestDto, error) {
+	request, err := service.Repo.AcceptRequest(id)
 	if err != nil {
-		return dto.EncounterRequestDto{}, fmt.Errorf("failed to accept request: %v", err)
+		return dto.EncounterRequestDto{}, fmt.Errorf("failed to accept encounter request: %v", err)
 	}
 	return dto.CreateEncounterRequestDto(request), nil
 }
 
-func (s EncounterRequestService) RejectRequest(id int64) (dto.EncounterRequestDto, error) {
-	request, err := s.Repo.RejectRequest(id)
+func (service EncounterRequestService) RejectRequest(id int64) (dto.EncounterRequestDto, error) {
+	request, err := service.Repo.RejectRequest(id)
 	if err != nil {
-		return dto.EncounterRequestDto{}, fmt.Errorf("failed to reject request: %v", err)
+		return dto.EncounterRequestDto{}, fmt.Errorf("failed to reject encounter request: %v", err)
 	}
 	return dto.CreateEncounterRequestDto(request), nil
 }
 
-func (s EncounterRequestService) Create(encounterRequestDto dto.EncounterRequestDto, encounterId int64, touristId int64) (dto.EncounterRequestDto, error) {
+func (service *EncounterRequestService) Create(encounterRequestDto dto.EncounterRequestDto) (dto.EncounterRequestDto, error) {
 	requestDto := encounterRequestDto.GetEncounterRequest()
-
-	if requestDto.EncounterId != encounterId {
-		return dto.CreateEncounterRequestDto(requestDto), fmt.Errorf("Encounter not valid")
+	err := service.Repo.Create(&requestDto)
+	if err != nil {
+		return dto.EncounterRequestDto{}, fmt.Errorf("failed to create encounter request: %v", err)
 	}
-
-	if requestDto.TouristId != touristId {
-		return dto.CreateEncounterRequestDto(requestDto), fmt.Errorf("Tourist not valid")
-	}
-	s.Repo.Create(&requestDto)
 	return dto.CreateEncounterRequestDto(requestDto), nil
+}
+
+func (service *EncounterRequestService) GetAll() ([]dto.EncounterRequestDto, error) {
+	encounterRequests, err := service.Repo.GetAll()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch encounter requests: %v", err)
+	}
+
+	dtoList := make([]dto.EncounterRequestDto, 0, len(encounterRequests))
+
+	for _, request := range encounterRequests {
+		dto := dto.CreateEncounterRequestDto(request)
+		dtoList = append(dtoList, dto)
+	}
+
+	return dtoList, nil
 }

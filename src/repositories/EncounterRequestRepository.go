@@ -6,11 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type EncounterRequestDatabaseRepository struct {
+type EncounterRequestRepository struct {
 	DatabaseConnection *gorm.DB
 }
 
-func (repo *EncounterRequestDatabaseRepository) Create(encounterRequest *model.EncounterRequest) error {
+func (repo *EncounterRequestRepository) Create(encounterRequest *model.EncounterRequest) error {
 	dbResult := repo.DatabaseConnection.Create(encounterRequest)
 	if dbResult.Error != nil {
 		return dbResult.Error
@@ -18,7 +18,7 @@ func (repo *EncounterRequestDatabaseRepository) Create(encounterRequest *model.E
 	return nil
 }
 
-func (repo *EncounterRequestDatabaseRepository) AcceptRequest(id int) (model.EncounterRequest, error) {
+func (repo *EncounterRequestRepository) AcceptRequest(id int64) (model.EncounterRequest, error) {
 	requestToUpdate := model.EncounterRequest{}
 	dbResult := repo.DatabaseConnection.First(&requestToUpdate, "Id = ?", id)
 	if dbResult.Error != nil {
@@ -34,7 +34,7 @@ func (repo *EncounterRequestDatabaseRepository) AcceptRequest(id int) (model.Enc
 	return requestToUpdate, nil
 }
 
-func (repo *EncounterRequestDatabaseRepository) RejectRequest(id int) (model.EncounterRequest, error) {
+func (repo *EncounterRequestRepository) RejectRequest(id int64) (model.EncounterRequest, error) {
 	requestToUpdate := model.EncounterRequest{}
 	dbResult := repo.DatabaseConnection.First(&requestToUpdate, "Id = ?", id)
 	if dbResult.Error != nil {
@@ -48,4 +48,14 @@ func (repo *EncounterRequestDatabaseRepository) RejectRequest(id int) (model.Enc
 	}
 
 	return requestToUpdate, nil
+}
+
+func (repo *EncounterRequestRepository) GetAll() ([]model.EncounterRequest, error) {
+	var encounterRequests []model.EncounterRequest
+	dbResult := repo.DatabaseConnection.Find(&encounterRequests)
+	if dbResult.Error != nil {
+		return nil, dbResult.Error
+	}
+
+	return encounterRequests, nil
 }
