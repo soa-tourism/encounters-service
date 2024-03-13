@@ -40,7 +40,7 @@ func CreateEncounterExecutionDto(enc model.EncounterExecution) EncounterExecutio
 		EncounterId:  enc.EncounterId,
 		EncounterDto: CreateEncounterDto(enc.Encounter),
 		TouristId:    enc.TouristId,
-		Status:       StatusStringConversion(int(enc.Status)),
+		Status:       StatusStringConversion(enc.Status),
 		StartTime:    enc.StartTime,
 	}
 }
@@ -51,7 +51,7 @@ func (executionDto EncounterExecutionDto) GetEncounterExecution() model.Encounte
 		EncounterId: executionDto.EncounterId,
 		TouristId:   executionDto.TouristId,
 		Encounter:   executionDto.EncounterDto.GetEncounter(),
-		Status:      model.EncounterExecutionStatus(StatusNumberConversion(executionDto.Status)),
+		Status:      StatusNumberConversion(executionDto.Status),
 		StartTime:   executionDto.StartTime,
 	}
 }

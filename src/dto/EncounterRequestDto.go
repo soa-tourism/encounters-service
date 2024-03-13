@@ -14,7 +14,7 @@ func CreateEncounterRequestDto(enc model.EncounterRequest) EncounterRequestDto {
 		Id:          enc.Id,
 		EncounterId: enc.EncounterId,
 		TouristId:   enc.TouristId,
-		Status:      RequestStatusStringConversion(int(enc.Status)),
+		Status:      RequestStatusStringConversion(enc.Status),
 	}
 }
 
@@ -23,7 +23,7 @@ func (request EncounterRequestDto) GetEncounterRequest() model.EncounterRequest 
 		Id:          request.Id,
 		EncounterId: request.EncounterId,
 		TouristId:   request.TouristId,
-		Status:      model.RequestStatus(RequestStatusNumberConversion(request.Status)),
+		Status:      RequestStatusNumberConversion(request.Status),
 	}
 }
 

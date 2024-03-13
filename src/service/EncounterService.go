@@ -50,6 +50,7 @@ func (s EncounterService) Update(encounter dto.EncounterDto, userId int64) (dto.
 	}
 	err := s.Repo.Update(&enc)
 	if err != nil {
+
 		return encounter, fmt.Errorf(fmt.Sprintf("Error updating encounter"))
 	}
 	return dto.CreateEncounterDto(enc), nil

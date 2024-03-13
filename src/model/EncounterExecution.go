@@ -8,23 +8,13 @@ import (
 	"time"
 )
 
-// EncounterExecutionStatus represents the status of an encounter execution.
-type EncounterExecutionStatus int
-
-const (
-	Pending EncounterExecutionStatus = iota
-	Completed
-	Active
-	Abandoned
-)
-
 // EncounterExecution represents an encounter execution in the explorer system.
 type EncounterExecution struct {
 	Id          int64                      `json:"id" gorm:"primaryKey"`
 	EncounterId int64                      `json:"encounterId" gorm:"foreignKey:Id;references:Id"`
 	Encounter   Encounter                  `json:"encounter"`
 	TouristId   int64                      `json:"touristId"`
-	Status      EncounterExecutionStatus   `json:"status"`
+	Status      int                        `json:"status"` //Pending, Completed, Active, Abandoned
 	StartTime   time.Time                  `json:"startTime"`
 	EndTime     time.Time                  `json:"endTime"`
 	Changes     []abstractions.DomainEvent `json:"-" gorm:"type:jsonb;"`
@@ -32,7 +22,7 @@ type EncounterExecution struct {
 }
 
 // NewEncounterExecution creates a new EncounterExecution with the specified parameters.
-func NewEncounterExecution(encounterID int64, touristID int64, status EncounterExecutionStatus, startTime, endTime time.Time) (EncounterExecution, error) {
+func NewEncounterExecution(encounterID int64, touristID int64, status int, startTime, endTime time.Time) (EncounterExecution, error) {
 	ee := EncounterExecution{
 		EncounterId: encounterID,
 		TouristId:   touristID,
@@ -70,24 +60,24 @@ func (ee *EncounterExecution) Validate() error {
 
 // Activate sets the status to Active and updates the start time.
 func (ee *EncounterExecution) Activate() {
-	ee.Status = Active
+	ee.Status = 2
 	ee.StartTime = time.Now()
-	if ee.Encounter.Type == Social {
+	if ee.Encounter.Type == 0 {
 		ee.Causes(domainevents.NewSocialEncounterActivated(ee.Id, ee.TouristId, time.Now()))
 	}
 }
 
 // Abandon sets the status to Abandoned.
 func (ee *EncounterExecution) Abandon() {
-	ee.Status = Abandoned
+	ee.Status = 3
 }
 
 // Complete sets the status to Completed and updates the end time.
 func (ee *EncounterExecution) Complete() {
-	if ee.Encounter.Type == Social && ee.Status == Active {
+	if ee.Encounter.Type == 0 && ee.Status == 2 {
 		ee.Causes(domainevents.NewSocialEncounterCompleted(ee.Id, time.Now(), ee.TouristId))
 	}
-	ee.Status = Completed
+	ee.Status = 2
 	ee.EndTime = time.Now()
 }
 
