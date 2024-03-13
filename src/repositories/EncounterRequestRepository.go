@@ -18,7 +18,7 @@ func (repo *EncounterRequestDatabaseRepository) Create(encounterRequest *model.E
 	return nil
 }
 
-func (repo *EncounterRequestDatabaseRepository) AcceptRequest(id int) (model.EncounterRequest, error) {
+func (repo *EncounterRequestDatabaseRepository) AcceptRequest(id int64) (model.EncounterRequest, error) {
 	requestToUpdate := model.EncounterRequest{}
 	dbResult := repo.DatabaseConnection.First(&requestToUpdate, "Id = ?", id)
 	if dbResult.Error != nil {
@@ -34,7 +34,7 @@ func (repo *EncounterRequestDatabaseRepository) AcceptRequest(id int) (model.Enc
 	return requestToUpdate, nil
 }
 
-func (repo *EncounterRequestDatabaseRepository) RejectRequest(id int) (model.EncounterRequest, error) {
+func (repo *EncounterRequestDatabaseRepository) RejectRequest(id int64) (model.EncounterRequest, error) {
 	requestToUpdate := model.EncounterRequest{}
 	dbResult := repo.DatabaseConnection.First(&requestToUpdate, "Id = ?", id)
 	if dbResult.Error != nil {
