@@ -1,18 +1,10 @@
 package model
 
-type RequestStatus int
-
-const (
-	OnHold RequestStatus = iota
-	Accepted
-	Rejected
-)
-
 type EncounterRequest struct {
 	Id          int64
 	EncounterId int64
 	TouristId   int64
-	Status      int //OnHold, Accepted, Rejected
+	Status      int // 0 for OnHold, 1 for Accepted, 2 for Rejected
 }
 
 func NewEncounterRequest(encounterId int64, requestStatus int, touristId int64) *EncounterRequest {
