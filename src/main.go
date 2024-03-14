@@ -7,6 +7,7 @@ import (
 	"encounters-service/service"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/gorilla/mux"
 	"gorm.io/driver/postgres"
@@ -37,8 +38,11 @@ func startEncounterServer(handler *handler.EncounterRequestHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/encounterRequests/getAll", handler.GetAll).Methods("GET")
+	router.HandleFunc("/encounterRequests/accept/{id}", handler.AcceptRequest).Methods("PUT")
+	router.HandleFunc("/encounterRequests/reject/{id}", handler.RejectRequest).Methods("PUT")
+
 	println("Server starting")
-	//log.Fatal(http.ListenAndServe(":BIRACEMO_PORT", router))
+	log.Fatal(http.ListenAndServe(":8090", router))
 }
 
 func main() {
