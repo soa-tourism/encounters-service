@@ -36,8 +36,7 @@ func initDB() *gorm.DB {
 func startEncounterServer(handler *handler.EncounterRequestHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/encounters/getAll", handler.GetAll).Methods("GET")
-
+	router.HandleFunc("/encounterRequests/getAll", handler.GetAll).Methods("GET")
 	println("Server starting")
 	//log.Fatal(http.ListenAndServe(":BIRACEMO_PORT", router))
 }

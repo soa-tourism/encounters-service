@@ -40,10 +40,7 @@ func (s EncounterExecutionService) Get(executionId int64) (dto.EncounterExecutio
 	return dto.CreateEncounterExecutionDto(execution), nil
 }
 
-func (s EncounterExecutionService) Update(execution dto.EncounterExecutionDto, userId int64) (dto.EncounterExecutionDto, error) {
-	if userId != execution.TouristId {
-		return execution, fmt.Errorf("not the tourist of the execution")
-	}
+func (s EncounterExecutionService) Update(execution dto.EncounterExecutionDto) (dto.EncounterExecutionDto, error) {
 	enc := execution.GetEncounterExecution()
 	err := enc.Validate()
 	if err != nil {
