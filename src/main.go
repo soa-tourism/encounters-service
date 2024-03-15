@@ -62,6 +62,7 @@ func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandl
 	router.HandleFunc("/execution/getActiveByTour/{touristId}", executionHandler.GetActiveByTour).Methods("PUT")
 	//! end of body required methods
 	router.HandleFunc("/execution/activate/{id}/{touristId}/{touristLatitude}/{touristLongitude}", executionHandler.Activate).Methods("PUT")
+	//! update tourists xp points
 	router.HandleFunc("/execution/complete/{id}/{touristId}/{touristLatitude}/{touristLongitude}", executionHandler.CompleteExecution).Methods("PUT")
 	router.HandleFunc("/execution/update", executionHandler.Update).Methods("PUT")
 	router.HandleFunc("/execution/delete/{id}/{touristId}", executionHandler.Update).Methods("DELETE")
