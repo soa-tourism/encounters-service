@@ -47,7 +47,7 @@ func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandl
 	router.HandleFunc("/encounter/get/{id}", encounterHandler.GetById).Methods("GET")
 	router.HandleFunc("/encounter/create", encounterHandler.Create).Methods("POST")
 	router.HandleFunc("/encounter/update", encounterHandler.Update).Methods("PUT")
-	router.HandleFunc("/encounter/delete/{id}", encounterHandler.Update).Methods("DELETE")
+	router.HandleFunc("/encounter/delete/{id}", encounterHandler.Delete).Methods("DELETE")
 
 	//*executions
 	router.HandleFunc("/execution/get/{id}", executionHandler.GetById).Methods("GET")

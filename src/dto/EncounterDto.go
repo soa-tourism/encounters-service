@@ -7,7 +7,7 @@ type EncounterDto struct {
 	AuthorId          int64   `json:"AuthorId"`
 	Name              string  `json:"Name"`
 	Description       string  `json:"Description"`
-	Xp                int     `json:"Xp"`
+	Xp                int     `json:"XP"`
 	Status            string  `json:"Status"`
 	Type              string  `json:"Type"`
 	Latitude          float64 `json:"Latitude"`
