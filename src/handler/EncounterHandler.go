@@ -12,7 +12,7 @@ import (
 )
 
 type EncounterHandler struct {
-	Service service.EncounterService
+	Service *service.EncounterService
 }
 
 func (h EncounterHandler) GetById(writer http.ResponseWriter, req *http.Request) {

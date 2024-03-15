@@ -12,8 +12,8 @@ import (
 )
 
 type EncounterExecutionHandler struct {
-	ExecutionService service.EncounterExecutionService
-	EncounterService service.EncounterService
+	ExecutionService *service.EncounterExecutionService
+	EncounterService *service.EncounterService
 }
 
 func (h EncounterExecutionHandler) GetById(writer http.ResponseWriter, req *http.Request) {

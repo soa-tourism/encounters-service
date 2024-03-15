@@ -34,14 +34,37 @@ func initDB() *gorm.DB {
 	return database
 }
 
-func startEncounterServer(handler *handler.EncounterRequestHandler) {
+func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandler *handler.EncounterHandler, executionHandler *handler.EncounterExecutionHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/encounterRequests/getAll", handler.GetAll).Methods("GET")
-	router.HandleFunc("/encounterRequests/accept/{id}", handler.AcceptRequest).Methods("PUT")
-	router.HandleFunc("/encounterRequests/reject/{id}", handler.RejectRequest).Methods("PUT")
+	//*requests
+	router.HandleFunc("/encounterRequests/getAll", requestHandler.GetAll).Methods("GET")
+	router.HandleFunc("/encounterRequests/accept/{id}", requestHandler.AcceptRequest).Methods("PUT")
+	router.HandleFunc("/encounterRequests/reject/{id}", requestHandler.RejectRequest).Methods("PUT")
 
-	println("Server starting")
+	//*encounters
+	router.HandleFunc("/encounter/getAll", encounterHandler.GetAll).Methods("GET")
+	router.HandleFunc("/encounter/get/{id}", encounterHandler.GetById).Methods("GET")
+	router.HandleFunc("/encounter/create", encounterHandler.Create).Methods("POST")
+	router.HandleFunc("/encounter/update", encounterHandler.Update).Methods("PUT")
+	router.HandleFunc("/encounter/delete/{id}", encounterHandler.Update).Methods("DELETE")
+
+	//*executions
+	router.HandleFunc("/execution/get/{id}", executionHandler.GetById).Methods("GET")
+	router.HandleFunc("/execution/getAllByTourist/{id}", executionHandler.GetAllByTourist).Methods("GET")
+	router.HandleFunc("/execution/getAllCpmpletedByTourist/{id}", executionHandler.GetAllCompletedByTourist).Methods("GET")
+	//! need body (encounterIds)
+	router.HandleFunc("/execution/getByTour/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.GetByTour).Methods("PUT")
+	router.HandleFunc("/execution/checkPosition/{id}/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.CheckPosition).Methods("PUT")
+	router.HandleFunc("/execution/checkPositionLocationEncounter/{id}/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.CheckPositionLocationEncounter).Methods("PUT")
+	router.HandleFunc("/execution/getActiveByTour/{touristId}", executionHandler.GetActiveByTour).Methods("PUT")
+	//! end of body required methods
+	router.HandleFunc("/execution/activate/{id}/{touristId}/{touristLatitude}/{touristLongitude}", executionHandler.Activate).Methods("PUT")
+	router.HandleFunc("/execution/complete/{id}/{touristId}/{touristLatitude}/{touristLongitude}", executionHandler.CompleteExecution).Methods("PUT")
+	router.HandleFunc("/execution/update", executionHandler.Update).Methods("PUT")
+	router.HandleFunc("/execution/delete/{id}/{touristId}", executionHandler.Update).Methods("DELETE")
+
+	println("Server listening on port 8090")
 	log.Fatal(http.ListenAndServe(":8090", router))
 }
 
@@ -55,5 +78,14 @@ func main() {
 	encounterRequestRepo := &repository.EncounterRequestRepository{DatabaseConnection: database}
 	encounterRequestService := &service.EncounterRequestService{Repo: encounterRequestRepo}
 	encounterRequestHandler := &handler.EncounterRequestHandler{EncounterRequestService: encounterRequestService}
-	startEncounterServer(encounterRequestHandler)
+
+	encounterRepo := &repository.EncountersRepository{DatabaseConnection: database}
+	encounterService := &service.EncounterService{Repo: encounterRepo}
+	encounterHandler := &handler.EncounterHandler{Service: encounterService}
+
+	encounterExecutionRepo := &repository.EncountersExecutionRepository{DatabaseConnection: database}
+	encounterExecutionService := &service.EncounterExecutionService{Repo: encounterExecutionRepo}
+	encounterExecutionHandler := &handler.EncounterExecutionHandler{ExecutionService: encounterExecutionService, EncounterService: encounterService}
+
+	startServer(encounterRequestHandler, encounterHandler, encounterExecutionHandler)
 }
