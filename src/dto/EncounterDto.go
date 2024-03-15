@@ -3,21 +3,21 @@ package dto
 import "encounters-service/model"
 
 type EncounterDto struct {
-	Id                int64   `json:"id"`
-	AuthorId          int64   `json:"authorId"`
-	Name              string  `json:"name"`
-	Description       string  `json:"description"`
-	Xp                int     `json:"xp"`
-	Status            int     `json:"status"`
-	Type              int     `json:"type"`
-	Latitude          float64 `json:"latitude"`
-	Longitude         float64 `json:"longitude"`
-	LocationLongitude float64 `json:"locationLongitude"`
-	LocationLatitude  float64 `json:"locationLatitude"`
-	Image             string  `json:"image"`
-	Range             float64 `json:"range"`
-	RequiredPeople    int     `json:"requiredPeople"`
-	ActiveTouristsIds []int   `json:"activeTouristsIds"`
+	Id                int64   `json:"Id"`
+	AuthorId          int64   `json:"AuthorId"`
+	Name              string  `json:"Name"`
+	Description       string  `json:"Description"`
+	Xp                int     `json:"Xp"`
+	Status            string  `json:"Status"`
+	Type              string  `json:"Type"`
+	Latitude          float64 `json:"Latitude"`
+	Longitude         float64 `json:"Longitude"`
+	LocationLongitude float64 `json:"LocationLongitude"`
+	LocationLatitude  float64 `json:"LocationLatitude"`
+	Image             string  `json:"Image"`
+	Range             float64 `json:"Range"`
+	RequiredPeople    int     `json:"RequiredPeople"`
+	ActiveTouristsIds []int   `json:"ActiveTouristsIds"`
 }
 
 func CreateEncounterDto(enc model.Encounter) EncounterDto {
@@ -27,8 +27,8 @@ func CreateEncounterDto(enc model.Encounter) EncounterDto {
 		Name:              enc.Name,
 		Description:       enc.Description,
 		Xp:                enc.Xp,
-		Status:            enc.Status,
-		Type:              enc.Type,
+		Status:            EncounterStatusStringConversion(enc.Status),
+		Type:              EncounterTypeStringConversion(enc.Type),
 		Latitude:          enc.Latitude,
 		Longitude:         enc.Longitude,
 		LocationLongitude: enc.LocationLongitude,
@@ -48,8 +48,8 @@ func (dto EncounterDto) GetEncounter() model.Encounter {
 		Name:              dto.Name,
 		Description:       dto.Description,
 		Xp:                dto.Xp,
-		Status:            dto.Status,
-		Type:              dto.Type,
+		Status:            EncounterStatusNumberConversion(dto.Status),
+		Type:              EncounterTypeNumberConversion(dto.Type),
 		Longitude:         dto.Longitude,
 		Latitude:          dto.Latitude,
 		LocationLongitude: dto.LocationLongitude,
@@ -60,4 +60,44 @@ func (dto EncounterDto) GetEncounter() model.Encounter {
 		RequiredPeople:    dto.RequiredPeople,
 	}
 	return encounter
+}
+
+func EncounterTypeStringConversion(number int) string {
+	if number == 0 {
+		return "Social"
+	}
+	if number == 1 {
+		return "Location"
+	}
+	return "Misc"
+}
+
+func EncounterTypeNumberConversion(status string) int {
+	if status == "Social" {
+		return 0
+	}
+	if status == "Location" {
+		return 1
+	}
+	return 2
+}
+
+func EncounterStatusStringConversion(number int) string {
+	if number == 0 {
+		return "Draft"
+	}
+	if number == 1 {
+		return "Archived"
+	}
+	return "Published"
+}
+
+func EncounterStatusNumberConversion(status string) int {
+	if status == "Draft" {
+		return 0
+	}
+	if status == "Archived" {
+		return 1
+	}
+	return 2
 }

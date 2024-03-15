@@ -14,33 +14,13 @@ type EncounterExecutionDto struct {
 	StartTime    time.Time    `json:"startTime"`
 }
 
-func StatusStringConversion(number int) string {
-	if number == 0 {
-		return "Draft"
-	}
-	if number == 1 {
-		return "Archived"
-	}
-	return "Published"
-}
-
-func StatusNumberConversion(status string) int {
-	if status == "Draft" {
-		return 0
-	}
-	if status == "Archived" {
-		return 1
-	}
-	return 2
-}
-
 func CreateEncounterExecutionDto(enc model.EncounterExecution) EncounterExecutionDto {
 	return EncounterExecutionDto{
 		Id:           enc.Id,
 		EncounterId:  enc.EncounterId,
 		EncounterDto: CreateEncounterDto(enc.Encounter),
 		TouristId:    enc.TouristId,
-		Status:       StatusStringConversion(enc.Status),
+		Status:       ExecutionStatusStringConversion(enc.Status),
 		StartTime:    enc.StartTime,
 	}
 }
@@ -51,7 +31,33 @@ func (executionDto EncounterExecutionDto) GetEncounterExecution() model.Encounte
 		EncounterId: executionDto.EncounterId,
 		TouristId:   executionDto.TouristId,
 		Encounter:   executionDto.EncounterDto.GetEncounter(),
-		Status:      StatusNumberConversion(executionDto.Status),
+		Status:      ExecutionStatusNumberConversion(executionDto.Status),
 		StartTime:   executionDto.StartTime,
 	}
+}
+
+func ExecutionStatusStringConversion(number int) string {
+	if number == 0 {
+		return "Pending"
+	}
+	if number == 1 {
+		return "Completed"
+	}
+	if number == 3 {
+		return "Abandoned"
+	}
+	return "Active"
+}
+
+func ExecutionStatusNumberConversion(status string) int {
+	if status == "Pending" {
+		return 0
+	}
+	if status == "Completed" {
+		return 1
+	}
+	if status == "Abandoned" {
+		return 3
+	}
+	return 2
 }

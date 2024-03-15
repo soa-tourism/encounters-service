@@ -23,6 +23,7 @@ func NewEncounterRequestHandler(encounterRequestService *service.EncounterReques
 
 func (handler *EncounterRequestHandler) Create(writer http.ResponseWriter, req *http.Request) {
 	var requestDto dto.EncounterRequestDto
+	writer.Header().Set("Content-Type", "application/json")
 	err := json.NewDecoder(req.Body).Decode(&requestDto)
 	if err != nil {
 		fmt.Println("Error while parsing json:", err)
@@ -46,7 +47,6 @@ func (handler *EncounterRequestHandler) Create(writer http.ResponseWriter, req *
 	}
 
 	writer.WriteHeader(http.StatusCreated)
-	writer.Header().Set("Content-Type", "application/json")
 	writer.Write(response)
 }
 
