@@ -54,7 +54,7 @@ func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandl
 	//*executions
 	router.HandleFunc("/execution/get/{id}", executionHandler.GetById).Methods("GET")
 	router.HandleFunc("/execution/getAllByTourist/{id}", executionHandler.GetAllByTourist).Methods("GET")
-	router.HandleFunc("/execution/getAllCpmpletedByTourist/{id}", executionHandler.GetAllCompletedByTourist).Methods("GET")
+	router.HandleFunc("/execution/getAllCompletedByTourist/{id}", executionHandler.GetAllCompletedByTourist).Methods("GET")
 	//! need body (encounterIds)
 	router.HandleFunc("/execution/getByTour/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.GetByTour).Methods("PUT")
 	router.HandleFunc("/execution/checkPosition/{id}/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.CheckPosition).Methods("PUT")
