@@ -28,6 +28,7 @@ func (service EncounterRequestService) RejectRequest(id int64) (dto.EncounterReq
 
 func (service *EncounterRequestService) Create(encounterRequestDto dto.EncounterRequestDto) (dto.EncounterRequestDto, error) {
 	requestDto := encounterRequestDto.GetEncounterRequest()
+	requestDto.Status = 0
 	err := service.Repo.Create(&requestDto)
 	if err != nil {
 		return dto.EncounterRequestDto{}, fmt.Errorf("failed to create encounter request: %v", err)

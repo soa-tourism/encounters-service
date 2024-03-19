@@ -13,6 +13,7 @@ type EncounterService struct {
 // TODO: dodati encounter id u checkpoint nakon upisivanja encountera u bazu
 func (s EncounterService) Create(encounterDto dto.EncounterDto) (dto.EncounterDto, error) {
 	encounter := encounterDto.GetEncounter()
+	encounter.Status = 0
 	if encounter.IsValid() {
 		s.Repo.Create(&encounter)
 		return dto.CreateEncounterDto(encounter), nil

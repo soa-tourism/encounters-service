@@ -34,7 +34,7 @@ func initDB() *gorm.DB {
 	return database
 }
 
-func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandler *handler.EncounterHandler, executionHandler *handler.EncounterExecutionHandler) {
+func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandler *handler.EncounterHandler, executionHandler *handler.EncounterExecutionHandler, touristEncounterHandler *handler.TouristEncounterHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	//*requests
@@ -67,6 +67,15 @@ func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandl
 	router.HandleFunc("/execution/update", executionHandler.Update).Methods("PUT")
 	router.HandleFunc("/execution/delete/{id}/{touristId}", executionHandler.Update).Methods("DELETE")
 
+	//*tourist encounter
+	router.HandleFunc("/touristEncounter/getAll", touristEncounterHandler.GetAll).Methods("GET")
+	router.HandleFunc("/touristEncounter/get/{id}", touristEncounterHandler.GetById).Methods("GET")
+	//! update checkpoint
+	router.HandleFunc("/touristEncounter/create", touristEncounterHandler.Create).Methods("POST")
+	router.HandleFunc("/touristEncounter/update", touristEncounterHandler.Update).Methods("PUT")
+	//! update checkpoint
+	router.HandleFunc("/touristEncounter/delete/{id}", touristEncounterHandler.Delete).Methods("DELETE")
+
 	println("Server listening on port 8090")
 	log.Fatal(http.ListenAndServe(":8090", router))
 }
@@ -89,6 +98,7 @@ func main() {
 	encounterExecutionRepo := &repository.EncountersExecutionRepository{DatabaseConnection: database}
 	encounterExecutionService := &service.EncounterExecutionService{Repo: encounterExecutionRepo}
 	encounterExecutionHandler := &handler.EncounterExecutionHandler{ExecutionService: encounterExecutionService, EncounterService: encounterService}
+	touristEncounterHandler := &handler.TouristEncounterHandler{Service: encounterService, RequestService: encounterRequestService}
 
-	startServer(encounterRequestHandler, encounterHandler, encounterExecutionHandler)
+	startServer(encounterRequestHandler, encounterHandler, encounterExecutionHandler, touristEncounterHandler)
 }
