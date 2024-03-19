@@ -3,18 +3,20 @@ package dto
 import "encounters-service/model"
 
 type EncounterRequestDto struct {
-	Id          int64  `json:"id"`
-	EncounterId int64  `json:"encounterId"`
-	TouristId   int64  `json:"touristId"`
-	Status      string `json:"status"`
+	Id           int64        `json:"id"`
+	EncounterId  int64        `json:"encounterId"`
+	TouristId    int64        `json:"touristId"`
+	Status       string       `json:"status"`
+	EncounterDto EncounterDto `json:"encounterDto"`
 }
 
 func CreateEncounterRequestDto(enc model.EncounterRequest) EncounterRequestDto {
 	return EncounterRequestDto{
-		Id:          enc.Id,
-		EncounterId: enc.EncounterId,
-		TouristId:   enc.TouristId,
-		Status:      RequestStatusStringConversion(enc.Status),
+		Id:           enc.Id,
+		EncounterId:  enc.EncounterId,
+		TouristId:    enc.TouristId,
+		Status:       RequestStatusStringConversion(enc.Status),
+		EncounterDto: CreateEncounterDto(enc.Encounter),
 	}
 }
 
@@ -24,6 +26,7 @@ func (request EncounterRequestDto) GetEncounterRequest() model.EncounterRequest 
 		EncounterId: request.EncounterId,
 		TouristId:   request.TouristId,
 		Status:      RequestStatusNumberConversion(request.Status),
+		Encounter:   EncounterDto.GetEncounter(request.EncounterDto),
 	}
 }
 

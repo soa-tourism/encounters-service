@@ -52,7 +52,7 @@ func (repo *EncounterRequestRepository) RejectRequest(id int64) (model.Encounter
 
 func (repo *EncounterRequestRepository) GetAll() ([]model.EncounterRequest, error) {
 	var encounterRequests []model.EncounterRequest
-	dbResult := repo.DatabaseConnection.Find(&encounterRequests)
+	dbResult := repo.DatabaseConnection.Preload("Encounter").Find(&encounterRequests)
 	if dbResult.Error != nil {
 		return nil, dbResult.Error
 	}
