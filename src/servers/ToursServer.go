@@ -15,8 +15,7 @@ func NewToursServer(baseURL string) *ToursServer {
 }
 
 func (c *ToursServer) UpdateCheckpointEncounter(checkpointID, encounterID string, isSecretPrerequisite bool) error {
-	url := c.BaseURL + "/v1/tours/checkpoint/encounter/" + checkpointID + "/" + encounterID + "/" + strconv.FormatBool(isSecretPrerequisite)
-
+	url := c.BaseURL + "/v1/checkpoint/encounter/" + checkpointID + "/" + encounterID + "/" + strconv.FormatBool(isSecretPrerequisite)
 	req, err := http.NewRequest("PUT", url, nil)
 	if err != nil {
 		return err
