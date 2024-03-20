@@ -46,7 +46,7 @@ func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandl
 	router.HandleFunc("/encounter/getAll", encounterHandler.GetAll).Methods("GET")
 	router.HandleFunc("/encounter/get/{id}", encounterHandler.GetById).Methods("GET")
 	//! update checkpoint
-	router.HandleFunc("/encounter/create", encounterHandler.Create).Methods("POST")
+	router.HandleFunc("/encounter/create/{checkpointId}/{isSecretPrerequisite}", encounterHandler.Create).Methods("POST")
 	router.HandleFunc("/encounter/update", encounterHandler.Update).Methods("PUT")
 	//! update checkpoint
 	router.HandleFunc("/encounter/delete/{id}", encounterHandler.Delete).Methods("DELETE")

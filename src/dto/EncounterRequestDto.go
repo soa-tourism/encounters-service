@@ -3,11 +3,11 @@ package dto
 import "encounters-service/model"
 
 type EncounterRequestDto struct {
-	Id           int64        `json:"id"`
-	EncounterId  int64        `json:"encounterId"`
-	TouristId    int64        `json:"touristId"`
-	Status       string       `json:"status"`
-	EncounterDto EncounterDto `json:"encounterDto"`
+	Id           int64        `json:"Id"`
+	EncounterId  int64        `json:"EncounterId"`
+	TouristId    int64        `json:"TouristId"`
+	Status       string       `json:"Status"`
+	EncounterDto EncounterDto `json:"EncounterDto"`
 }
 
 func CreateEncounterRequestDto(enc model.EncounterRequest) EncounterRequestDto {

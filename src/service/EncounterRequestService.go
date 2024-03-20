@@ -15,6 +15,13 @@ func (service EncounterRequestService) AcceptRequest(id int64) (dto.EncounterReq
 	if err != nil {
 		return dto.EncounterRequestDto{}, fmt.Errorf("failed to accept encounter request: %v", err)
 	}
+	encRepo := repository.EncountersRepository{
+		DatabaseConnection: service.Repo.DatabaseConnection,
+	}
+	enc, _ := encRepo.Get(request.EncounterId)
+	enc.Status = 2
+	encRepo.Update(&enc)
+	request.Encounter = enc
 	return dto.CreateEncounterRequestDto(request), nil
 }
 
