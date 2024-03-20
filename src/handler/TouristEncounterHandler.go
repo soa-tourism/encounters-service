@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"encounters-service/dto"
 	"encounters-service/model"
+	"encounters-service/servers"
 	"encounters-service/service"
 	"fmt"
 	"net/http"
@@ -74,9 +75,32 @@ func (h TouristEncounterHandler) Create(writer http.ResponseWriter, req *http.Re
 		return
 	}
 
+	vars := mux.Vars(req)
+	checkpointID, err := strconv.ParseInt(vars["checkpointId"], 10, 64)
+	if err != nil {
+		fmt.Println("Error while parsing checkpointId:", err)
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	isSecretPrerequisite, err := strconv.ParseBool(vars["isSecretPrerequisite"])
+	if err != nil {
+		fmt.Println("Error while parsing checkpointId:", err)
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	result, err := h.Service.Create(requestDto)
 	if err != nil {
 		fmt.Println("Error while accepting the request:", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	encountersClient := servers.NewToursServer("http://localhost:8081")
+	err = encountersClient.UpdateCheckpointEncounter(strconv.FormatInt(checkpointID, 10), strconv.FormatInt(requestDto.Id, 10), isSecretPrerequisite)
+	if err != nil {
+		fmt.Println("Error while sending request to tours-microservice:", err)
+		// Handle error appropriately
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
