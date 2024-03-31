@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  encounters-service:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    restart: on-failure
+    networks:
+      - database  # Connect to the 'database' network
+    ports:
+      - "8090:8090"
+    environment:
+      DATABASE_HOST: database  # Use the service name as the host
+      DATABASE_PORT: 5432
+      DATABASE_PASSWORD: super
+      DATABASE_USER: postgres
+      DATABASE_SCHEMA: encounters
+    depends_on:
+      - database
+
+  database:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: super
+      POSTGRES_USER: postgres
+      POSTGRES_DB: explorer-v1
+      DATABASE_SCHEMA: encounters
+    volumes:
+      - type: volume
+        source: database-data
+        target: /var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - database 
+      
+volumes:
+  database-data:
+    name: explorer-v1
+
+networks:
+  database:
+    name: database

@@ -15,13 +15,14 @@ import (
 )
 
 func initDB() *gorm.DB {
-	dsn := "user=postgres password=super dbname=explorer-v1 host=localhost port=5432 sslmode=disable search_path=encounters"
+	dsn := "user=postgres password=super dbname=explorer-v1 host=database port=5432 sslmode=disable"
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 		return nil
 	}
 
+	fmt.Println(database)
 	database.AutoMigrate(&model.Encounter{},
 		&model.EncounterExecution{},
 		&model.EncounterRequest{})
@@ -30,7 +31,6 @@ func initDB() *gorm.DB {
 	if err != nil {
 		log.Fatalf("Error migrating models: %v", err)
 	}
-
 	return database
 }
 
