@@ -101,7 +101,7 @@ func (h EncounterHandler) Create(writer http.ResponseWriter, req *http.Request) 
 		return
 	}
 	// Send the request to tours-microservice
-	encountersClient := servers.NewToursServer("http://localhost:8081")
+	encountersClient := servers.NewToursServer("http://host.docker.internal:8081")
 	err = encountersClient.UpdateCheckpointEncounter(strconv.FormatInt(checkpointID, 10), strconv.FormatInt(result.Id, 10), isSecretPrerequisite)
 	if err != nil {
 		fmt.Println("Error while sending request to tours-microservice:", err)

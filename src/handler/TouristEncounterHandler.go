@@ -96,7 +96,7 @@ func (h TouristEncounterHandler) Create(writer http.ResponseWriter, req *http.Re
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	encountersClient := servers.NewToursServer("http://localhost:8081")
+	encountersClient := servers.NewToursServer("http://host.docker.internal:8081")
 	err = encountersClient.UpdateCheckpointEncounter(strconv.FormatInt(checkpointID, 10), strconv.FormatInt(requestDto.Id, 10), isSecretPrerequisite)
 	if err != nil {
 		fmt.Println("Error while sending request to tours-microservice:", err)
