@@ -2,13 +2,38 @@
 syntax = "proto3";
 
 option go_package = "proto/encounter";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-
 service Encounter {
   rpc Create(CreateRequest) returns (EncounterDto){}
   rpc Update(UpdateRequest) returns (EncounterDto){}
   rpc Delete(EncounterId) returns (google.protobuf.Empty){}
   rpc GetById(EncounterId) returns (EncounterDto){}
+
+  rpc CreateEncounterExecution(EncounterExecutionDto) returns (EncounterExecutionDto){}
+  rpc GetEncounterById(EncounterId) returns (EncounterDto){}
+  rpc UpdateEncounterExecution(EncounterExecutionDto) returns (EncounterExecutionDto){}
+  rpc ActivateEncounterExecution(ActivateRequest) returns (EncounterExecutionDto){}
+  rpc CompleteExecution(ActivateRequest) returns(EncounterExecutionDto){}
+  rpc DeleteExecution(EncounterId) returns (google.protobuf.Empty){}
+  rpc GetAllExecutionsByTourist(EncounterId) returns (PagedExecutions){}
+  rpc GetAllCompletedExecutionsByTourist(PagedRequestWithId) returns (PagedExecutions){}
+}
+message PagedRequestWithId{
+    int32 id = 1;
+    int32 page = 2;
+    int32 pageSize = 3;
+}
+
+message PagedExecutions{
+    repeated EncounterExecutionDto results = 1;
+    int32 totalCount = 2;
+}
+
+message ActivateRequest{
+    int32 id = 1;
+    double touristLatitude = 2;
+    double touristLongitude = 3;
 }
 
 message EncounterId{
@@ -25,6 +50,15 @@ message CreateRequest {
   int64 checkpoint_id = 2;
   bool is_secret_prerequisite = 3;
   repeated bytes image_f = 4;
+}
+
+message EncounterExecutionDto{
+    int64 id = 1;
+    int64 encounterId = 2;
+    EncounterDto encounterDto = 3;
+    int64 touristId = 4;
+    string status = 5;
+    google.protobuf.Timestamp startTime = 6;
 }
 
 message EncounterDto{

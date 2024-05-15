@@ -46,9 +46,6 @@ func (ee *EncounterExecution) Validate() error {
 	if ee.TouristId == 0 {
 		return errors.New("invalid tourist")
 	}
-	if ee.Status == 0 {
-		return errors.New("invalid execution status")
-	}
 	if ee.StartTime.After(time.Now()) {
 		return errors.New("invalid start time")
 	}

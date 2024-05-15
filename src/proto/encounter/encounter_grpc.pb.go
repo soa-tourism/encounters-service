@@ -27,6 +27,14 @@ type EncounterClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*EncounterDto, error)
 	Delete(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetById(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*EncounterDto, error)
+	CreateEncounterExecution(ctx context.Context, in *EncounterExecutionDto, opts ...grpc.CallOption) (*EncounterExecutionDto, error)
+	GetEncounterById(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*EncounterDto, error)
+	UpdateEncounterExecution(ctx context.Context, in *EncounterExecutionDto, opts ...grpc.CallOption) (*EncounterExecutionDto, error)
+	ActivateEncounterExecution(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*EncounterExecutionDto, error)
+	CompleteExecution(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*EncounterExecutionDto, error)
+	DeleteExecution(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetAllExecutionsByTourist(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*PagedExecutions, error)
+	GetAllCompletedExecutionsByTourist(ctx context.Context, in *PagedRequestWithId, opts ...grpc.CallOption) (*PagedExecutions, error)
 }
 
 type encounterClient struct {
@@ -73,6 +81,78 @@ func (c *encounterClient) GetById(ctx context.Context, in *EncounterId, opts ...
 	return out, nil
 }
 
+func (c *encounterClient) CreateEncounterExecution(ctx context.Context, in *EncounterExecutionDto, opts ...grpc.CallOption) (*EncounterExecutionDto, error) {
+	out := new(EncounterExecutionDto)
+	err := c.cc.Invoke(ctx, "/Encounter/CreateEncounterExecution", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) GetEncounterById(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*EncounterDto, error) {
+	out := new(EncounterDto)
+	err := c.cc.Invoke(ctx, "/Encounter/GetEncounterById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) UpdateEncounterExecution(ctx context.Context, in *EncounterExecutionDto, opts ...grpc.CallOption) (*EncounterExecutionDto, error) {
+	out := new(EncounterExecutionDto)
+	err := c.cc.Invoke(ctx, "/Encounter/UpdateEncounterExecution", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) ActivateEncounterExecution(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*EncounterExecutionDto, error) {
+	out := new(EncounterExecutionDto)
+	err := c.cc.Invoke(ctx, "/Encounter/ActivateEncounterExecution", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) CompleteExecution(ctx context.Context, in *ActivateRequest, opts ...grpc.CallOption) (*EncounterExecutionDto, error) {
+	out := new(EncounterExecutionDto)
+	err := c.cc.Invoke(ctx, "/Encounter/CompleteExecution", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) DeleteExecution(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/Encounter/DeleteExecution", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) GetAllExecutionsByTourist(ctx context.Context, in *EncounterId, opts ...grpc.CallOption) (*PagedExecutions, error) {
+	out := new(PagedExecutions)
+	err := c.cc.Invoke(ctx, "/Encounter/GetAllExecutionsByTourist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *encounterClient) GetAllCompletedExecutionsByTourist(ctx context.Context, in *PagedRequestWithId, opts ...grpc.CallOption) (*PagedExecutions, error) {
+	out := new(PagedExecutions)
+	err := c.cc.Invoke(ctx, "/Encounter/GetAllCompletedExecutionsByTourist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EncounterServer is the server API for Encounter service.
 // All implementations must embed UnimplementedEncounterServer
 // for forward compatibility
@@ -81,6 +161,14 @@ type EncounterServer interface {
 	Update(context.Context, *UpdateRequest) (*EncounterDto, error)
 	Delete(context.Context, *EncounterId) (*emptypb.Empty, error)
 	GetById(context.Context, *EncounterId) (*EncounterDto, error)
+	CreateEncounterExecution(context.Context, *EncounterExecutionDto) (*EncounterExecutionDto, error)
+	GetEncounterById(context.Context, *EncounterId) (*EncounterDto, error)
+	UpdateEncounterExecution(context.Context, *EncounterExecutionDto) (*EncounterExecutionDto, error)
+	ActivateEncounterExecution(context.Context, *ActivateRequest) (*EncounterExecutionDto, error)
+	CompleteExecution(context.Context, *ActivateRequest) (*EncounterExecutionDto, error)
+	DeleteExecution(context.Context, *EncounterId) (*emptypb.Empty, error)
+	GetAllExecutionsByTourist(context.Context, *EncounterId) (*PagedExecutions, error)
+	GetAllCompletedExecutionsByTourist(context.Context, *PagedRequestWithId) (*PagedExecutions, error)
 	mustEmbedUnimplementedEncounterServer()
 }
 
@@ -99,6 +187,30 @@ func (UnimplementedEncounterServer) Delete(context.Context, *EncounterId) (*empt
 }
 func (UnimplementedEncounterServer) GetById(context.Context, *EncounterId) (*EncounterDto, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetById not implemented")
+}
+func (UnimplementedEncounterServer) CreateEncounterExecution(context.Context, *EncounterExecutionDto) (*EncounterExecutionDto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateEncounterExecution not implemented")
+}
+func (UnimplementedEncounterServer) GetEncounterById(context.Context, *EncounterId) (*EncounterDto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEncounterById not implemented")
+}
+func (UnimplementedEncounterServer) UpdateEncounterExecution(context.Context, *EncounterExecutionDto) (*EncounterExecutionDto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateEncounterExecution not implemented")
+}
+func (UnimplementedEncounterServer) ActivateEncounterExecution(context.Context, *ActivateRequest) (*EncounterExecutionDto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ActivateEncounterExecution not implemented")
+}
+func (UnimplementedEncounterServer) CompleteExecution(context.Context, *ActivateRequest) (*EncounterExecutionDto, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompleteExecution not implemented")
+}
+func (UnimplementedEncounterServer) DeleteExecution(context.Context, *EncounterId) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteExecution not implemented")
+}
+func (UnimplementedEncounterServer) GetAllExecutionsByTourist(context.Context, *EncounterId) (*PagedExecutions, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllExecutionsByTourist not implemented")
+}
+func (UnimplementedEncounterServer) GetAllCompletedExecutionsByTourist(context.Context, *PagedRequestWithId) (*PagedExecutions, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllCompletedExecutionsByTourist not implemented")
 }
 func (UnimplementedEncounterServer) mustEmbedUnimplementedEncounterServer() {}
 
@@ -185,6 +297,150 @@ func _Encounter_GetById_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Encounter_CreateEncounterExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EncounterExecutionDto)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).CreateEncounterExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/CreateEncounterExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).CreateEncounterExecution(ctx, req.(*EncounterExecutionDto))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_GetEncounterById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EncounterId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).GetEncounterById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/GetEncounterById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).GetEncounterById(ctx, req.(*EncounterId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_UpdateEncounterExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EncounterExecutionDto)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).UpdateEncounterExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/UpdateEncounterExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).UpdateEncounterExecution(ctx, req.(*EncounterExecutionDto))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_ActivateEncounterExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActivateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).ActivateEncounterExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/ActivateEncounterExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).ActivateEncounterExecution(ctx, req.(*ActivateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_CompleteExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActivateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).CompleteExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/CompleteExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).CompleteExecution(ctx, req.(*ActivateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_DeleteExecution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EncounterId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).DeleteExecution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/DeleteExecution",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).DeleteExecution(ctx, req.(*EncounterId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_GetAllExecutionsByTourist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EncounterId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).GetAllExecutionsByTourist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/GetAllExecutionsByTourist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).GetAllExecutionsByTourist(ctx, req.(*EncounterId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Encounter_GetAllCompletedExecutionsByTourist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PagedRequestWithId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EncounterServer).GetAllCompletedExecutionsByTourist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Encounter/GetAllCompletedExecutionsByTourist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EncounterServer).GetAllCompletedExecutionsByTourist(ctx, req.(*PagedRequestWithId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Encounter_ServiceDesc is the grpc.ServiceDesc for Encounter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -207,6 +463,38 @@ var Encounter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetById",
 			Handler:    _Encounter_GetById_Handler,
+		},
+		{
+			MethodName: "CreateEncounterExecution",
+			Handler:    _Encounter_CreateEncounterExecution_Handler,
+		},
+		{
+			MethodName: "GetEncounterById",
+			Handler:    _Encounter_GetEncounterById_Handler,
+		},
+		{
+			MethodName: "UpdateEncounterExecution",
+			Handler:    _Encounter_UpdateEncounterExecution_Handler,
+		},
+		{
+			MethodName: "ActivateEncounterExecution",
+			Handler:    _Encounter_ActivateEncounterExecution_Handler,
+		},
+		{
+			MethodName: "CompleteExecution",
+			Handler:    _Encounter_CompleteExecution_Handler,
+		},
+		{
+			MethodName: "DeleteExecution",
+			Handler:    _Encounter_DeleteExecution_Handler,
+		},
+		{
+			MethodName: "GetAllExecutionsByTourist",
+			Handler:    _Encounter_GetAllExecutionsByTourist_Handler,
+		},
+		{
+			MethodName: "GetAllCompletedExecutionsByTourist",
+			Handler:    _Encounter_GetAllCompletedExecutionsByTourist_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -65,7 +65,7 @@ func (repo *EncountersExecutionRepository) Delete(id int64) error {
 
 func (repo *EncountersExecutionRepository) GetAllByTourist(touristId int64) ([]model.EncounterExecution, error) {
 	var encounters []model.EncounterExecution
-	dbResult := repo.DatabaseConnection.Preload("Encounter").Where("TouristId = ?", touristId).Find(&encounters)
+	dbResult := repo.DatabaseConnection.Preload("Encounter").Where("tourist_id = ?", touristId).Find(&encounters)
 	if dbResult.Error != nil {
 		return nil, dbResult.Error
 	}
@@ -75,7 +75,7 @@ func (repo *EncountersExecutionRepository) GetAllByTourist(touristId int64) ([]m
 
 func (repo *EncountersExecutionRepository) GetAllCompletedByTourist(touristId int64) ([]model.EncounterExecution, error) {
 	var encounters []model.EncounterExecution
-	dbResult := repo.DatabaseConnection.Preload("Encounter").Where("TouristId = ? AND Status = 1", touristId).Find(&encounters)
+	dbResult := repo.DatabaseConnection.Preload("Encounter").Where("tourist_id = ? AND Status = 1", touristId).Find(&encounters)
 	if dbResult.Error != nil {
 		return nil, dbResult.Error
 	}
@@ -96,7 +96,7 @@ func (repo *EncountersExecutionRepository) FindByEncounterId(encounterId int64) 
 
 func (repo *EncountersExecutionRepository) GetByEncounterAndTourist(touristId, encounterId int64) (model.EncounterExecution, error) {
 	var execution model.EncounterExecution
-	dbResult := repo.DatabaseConnection.Preload("Encounter").Where("EncounterId = ? AND TouristId = ? ", encounterId, touristId).First(&execution)
+	dbResult := repo.DatabaseConnection.Preload("Encounter").Where("encounter_id = ? AND tourist_id = ? ", encounterId, touristId).First(&execution)
 
 	if dbResult.Error != nil {
 		return execution, dbResult.Error

@@ -12,6 +12,7 @@ type EncounterExecutionService struct {
 }
 
 func (s EncounterExecutionService) Create(encounterDto dto.EncounterExecutionDto, userId int64) (dto.EncounterExecutionDto, error) {
+	fmt.Println(encounterDto)
 	encounter := encounterDto.GetEncounterExecution()
 	if encounter.TouristId != userId {
 		return dto.CreateEncounterExecutionDto(encounter), fmt.Errorf("tourist is not ok")
