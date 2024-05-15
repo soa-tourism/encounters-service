@@ -47,7 +47,7 @@ message UpdateRequest{
 
 message CreateRequest {
   EncounterDto encounter = 1;
-  int64 checkpoint_id = 2;
+  string checkpoint_id = 2;
   bool is_secret_prerequisite = 3;
   repeated bytes image_f = 4;
 }
