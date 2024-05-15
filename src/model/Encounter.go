@@ -21,7 +21,7 @@ type Encounter struct {
 	Longitude         float64                    `json:"longitude"`
 	RequiredPeople    int                        `json:"requiredPeople"`
 	Range             float64                    `json:"range"`
-	ActiveTouristsIds []int                      `json:"activeTouristsIds" gorm:"type:jsonb"`
+	ActiveTouristsIds []int32                    `json:"activeTouristsIds" gorm:"type:jsonb"`
 	LocationLongitude float64                    `json:"locationLongitude"`
 	LocationLatitude  float64                    `json:"locationLatitude"`
 	Image             string                     `json:"image"`
@@ -146,8 +146,8 @@ func (s *Encounter) AddTourist(touristId int) {
 		return
 	}
 	if !s.isTouristInActiveList(touristId) {
-		s.ActiveTouristsIds = append(s.ActiveTouristsIds, touristId)
-		s.Causes(domainevents.NewSocialEncounterRangeChecked(s.Id, s.ActiveTouristsIds, time.Now()))
+		s.ActiveTouristsIds = append(s.ActiveTouristsIds, int32(touristId))
+		//s.Causes(domainevents.NewSocialEncounterRangeChecked(s.Id, s.ActiveTouristsIds, time.Now()))
 	}
 }
 
@@ -157,9 +157,9 @@ func (s *Encounter) RemoveTourist(touristId int) {
 	}
 	if s.isTouristInActiveList(touristId) {
 		for i, id := range s.ActiveTouristsIds {
-			if id == touristId {
+			if id == int32(touristId) {
 				s.ActiveTouristsIds = append(s.ActiveTouristsIds[:i], s.ActiveTouristsIds[i+1:]...)
-				s.Causes(domainevents.NewSocialEncounterRangeChecked(s.Id, s.ActiveTouristsIds, time.Now()))
+				//s.Causes(domainevents.NewSocialEncounterRangeChecked(s.Id, s.ActiveTouristsIds, time.Now()))
 				break
 			}
 		}
@@ -179,7 +179,7 @@ func (s *Encounter) IsRequiredPeopleNumber() bool {
 
 func (s *Encounter) ClearActiveTourists() {
 	if s.Status == 0 {
-		s.ActiveTouristsIds = []int{}
+		s.ActiveTouristsIds = []int32{}
 	}
 }
 
@@ -188,7 +188,7 @@ func (s *Encounter) isTouristInActiveList(touristId int) bool {
 		return false
 	}
 	for _, id := range s.ActiveTouristsIds {
-		if id == touristId {
+		if id == int32(touristId) {
 			return true
 		}
 	}

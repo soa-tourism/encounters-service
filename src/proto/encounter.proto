@@ -1,0 +1,47 @@
+
+syntax = "proto3";
+
+option go_package = "proto/encounter";
+import "google/protobuf/empty.proto";
+
+service Encounter {
+  rpc Create(CreateRequest) returns (EncounterDto){}
+  rpc Update(UpdateRequest) returns (EncounterDto){}
+  rpc Delete(EncounterId) returns (google.protobuf.Empty){}
+  rpc GetById(EncounterId) returns (EncounterDto){}
+}
+
+message EncounterId{
+    int32 id = 1;
+}
+
+message UpdateRequest{
+    EncounterDto encounter = 1;
+    repeated bytes image_f = 2;
+}
+
+message CreateRequest {
+  EncounterDto encounter = 1;
+  int64 checkpoint_id = 2;
+  bool is_secret_prerequisite = 3;
+  repeated bytes image_f = 4;
+}
+
+message EncounterDto{
+    int64 authorId = 1;
+    int32 id = 2;
+    string name =3;
+    string description = 4;
+    int32 xP = 5;
+    string status = 6;
+    string type = 7;
+    double longitude = 8;
+    double latitude = 9;
+    double locationLongitude = 10;
+    double locationLatitude = 11;
+    string image =12;
+    double range = 13;
+    int32 requiredPeople = 14;
+    repeated int32 activeTouristsIds = 15;
+}
+

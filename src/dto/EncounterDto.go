@@ -17,7 +17,7 @@ type EncounterDto struct {
 	Image             string  `json:"Image"`
 	Range             float64 `json:"Range"`
 	RequiredPeople    int     `json:"RequiredPeople"`
-	ActiveTouristsIds []int   `json:"ActiveTouristsIds"`
+	ActiveTouristsIds []int32 `json:"ActiveTouristsIds"`
 }
 
 func CreateEncounterDto(enc model.Encounter) EncounterDto {
