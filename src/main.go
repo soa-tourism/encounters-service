@@ -4,8 +4,11 @@ import (
 	"context"
 	"encounters-service/dto"
 	"encounters-service/model"
+	"encounters-service/orchestrator"
 	"encounters-service/proto/encounter"
 	repository "encounters-service/repositories"
+	saga "encounters-service/saga/messaging"
+	"encounters-service/saga/messaging/nats"
 	"encounters-service/service"
 	"fmt"
 	"log"
@@ -58,7 +61,8 @@ func main() {
 	encounterRequestService := &service.EncounterRequestService{Repo: encounterRequestRepo}
 
 	encounterRepo := &repository.EncountersRepository{DatabaseConnection: database}
-	encounterService := &service.EncounterService{Repo: encounterRepo}
+	orc := initCreateEncounterOrchestrator(initPublisher(), initSubscriber(), *encounterRepo)
+	encounterService := &service.EncounterService{Repo: encounterRepo, Orchestrator: orc}
 
 	encounterExecutionRepo := &repository.EncountersExecutionRepository{DatabaseConnection: database}
 	encounterExecutionService := &service.EncounterExecutionService{Repo: encounterExecutionRepo}
@@ -81,7 +85,7 @@ type Server struct {
 func (s Server) Create(ctx context.Context, request *encounter.CreateRequest) (*encounter.EncounterDto, error) {
 	fmt.Println("HEY CREATE")
 	enc := dtoFromRequest(*request.Encounter)
-	p, ok := s.encounterService.Create(enc)
+	p, ok := s.encounterService.Create(enc, *request)
 	if ok != nil {
 		return nil, status.Error(codes.NotFound, "Error creating encounter.")
 	}
@@ -254,48 +258,30 @@ func executionResponsefromDto(p dto.EncounterExecutionDto) encounter.EncounterEx
 	}
 }
 
-// func startServer(requestHandler *handler.EncounterRequestHandler, encounterHandler *handler.EncounterHandler, executionHandler *handler.EncounterExecutionHandler, touristEncounterHandler *handler.TouristEncounterHandler) {
-// 	router := mux.NewRouter().StrictSlash(true)
+func initPublisher() saga.Publisher {
+	publisher, err := nats.NewNATSPublisher(
+		"nats", "4222",
+		"ruser", "T0pS3cr3t", "encounter.create.command")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return publisher
+}
 
-// 	//*requests
-// 	router.HandleFunc("/encounterRequests/getAll", requestHandler.GetAll).Methods("GET")
-// 	router.HandleFunc("/encounterRequests/accept/{id}", requestHandler.AcceptRequest).Methods("PUT")
-// 	router.HandleFunc("/encounterRequests/reject/{id}", requestHandler.RejectRequest).Methods("PUT")
+func initSubscriber() saga.Subscriber {
+	subscriber, err := nats.NewNATSSubscriber(
+		"nats", "4222",
+		"ruser", "T0pS3cr3t", "encounter.create.reply", "encounters_service")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return subscriber
+}
 
-// 	//*encounters
-// 	router.HandleFunc("/encounter/getAll", encounterHandler.GetAll).Methods("GET")
-// 	router.HandleFunc("/encounter/get/{id}", encounterHandler.GetById).Methods("GET")
-// 	//! update checkpoint
-// 	router.HandleFunc("/encounter/create/{checkpointId}/{isSecretPrerequisite}", encounterHandler.Create).Methods("POST")
-// 	router.HandleFunc("/encounter/update", encounterHandler.Update).Methods("PUT")
-// 	//! update checkpoint
-// 	router.HandleFunc("/encounter/delete/{id}", encounterHandler.Delete).Methods("DELETE")
-
-// 	//*executions
-// 	router.HandleFunc("/execution/get/{id}", executionHandler.GetById).Methods("GET")
-// 	router.HandleFunc("/execution/getAllByTourist/{id}", executionHandler.GetAllByTourist).Methods("GET")
-// 	router.HandleFunc("/execution/getAllCompletedByTourist/{id}", executionHandler.GetAllCompletedByTourist).Methods("GET")
-// 	//! need body (encounterIds)
-// 	router.HandleFunc("/execution/getByTour/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.GetByTour).Methods("PUT")
-// 	router.HandleFunc("/execution/checkPosition/{id}/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.CheckPosition).Methods("PUT")
-// 	router.HandleFunc("/execution/checkPositionLocationEncounter/{id}/{touristLatitude}/{touristLongitude}/{touristId}", executionHandler.CheckPositionLocationEncounter).Methods("PUT")
-// 	router.HandleFunc("/execution/getActiveByTour/{touristId}", executionHandler.GetActiveByTour).Methods("PUT")
-// 	//! end of body required methods
-// 	router.HandleFunc("/execution/activate/{id}/{touristId}/{touristLatitude}/{touristLongitude}", executionHandler.Activate).Methods("PUT")
-// 	//! update tourists xp points
-// 	router.HandleFunc("/execution/complete/{id}/{touristId}/{touristLatitude}/{touristLongitude}", executionHandler.CompleteExecution).Methods("PUT")
-// 	router.HandleFunc("/execution/update", executionHandler.Update).Methods("PUT")
-// 	router.HandleFunc("/execution/delete/{id}/{touristId}", executionHandler.Update).Methods("DELETE")
-
-// 	//*tourist encounter
-// 	router.HandleFunc("/touristEncounter/getAll", touristEncounterHandler.GetAll).Methods("GET")
-// 	router.HandleFunc("/touristEncounter/get/{id}", touristEncounterHandler.GetById).Methods("GET")
-// 	//! update checkpoint
-// 	router.HandleFunc("/touristEncounter/create/{checkpointId}/{isSecretPrerequisite}", touristEncounterHandler.Create).Methods("POST")
-// 	router.HandleFunc("/touristEncounter/update", touristEncounterHandler.Update).Methods("PUT")
-// 	//! update checkpoint
-// 	router.HandleFunc("/touristEncounter/delete/{id}", touristEncounterHandler.Delete).Methods("DELETE")
-
-// 	println("Server listening on port 8090")
-// 	log.Fatal(http.ListenAndServe(":8090", router))
-// }
+func initCreateEncounterOrchestrator(publisher saga.Publisher, subscriber saga.Subscriber, database repository.EncountersRepository) *orchestrator.CreateEncounterOrchestrator {
+	orchestrator, err := orchestrator.NewCreateEncounterOrchestrator(publisher, subscriber, database)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return orchestrator
+}

@@ -2,20 +2,29 @@ package service
 
 import (
 	"encounters-service/dto"
+	"encounters-service/orchestrator"
+	"encounters-service/proto/encounter"
 	repository "encounters-service/repositories"
 	"fmt"
+	"strconv"
 )
 
 type EncounterService struct {
-	Repo *repository.EncountersRepository
+	Repo         *repository.EncountersRepository
+	Orchestrator *orchestrator.CreateEncounterOrchestrator
 }
 
-// TODO: dodati encounter id u checkpoint nakon upisivanja encountera u bazu
-func (s EncounterService) Create(encounterDto dto.EncounterDto) (dto.EncounterDto, error) {
+func (s EncounterService) Create(encounterDto dto.EncounterDto, request encounter.CreateRequest) (dto.EncounterDto, error) {
 	encounter := encounterDto.GetEncounter()
 	encounter.Status = 0
 	if encounter.IsValid() {
 		s.Repo.Create(&encounter)
+		err := s.Orchestrator.Start(&request, encounter.Id)
+		if err != nil {
+			fmt.Println("Deleting encounter with ID "+ strconv.FormatInt(encounter.Id,10))
+			s.Delete(encounter.Id)
+			return dto.EncounterDto{}, nil
+		}
 		return dto.CreateEncounterDto(encounter), nil
 	}
 	return dto.CreateEncounterDto(encounter), fmt.Errorf("encounter is not valid")
